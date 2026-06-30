@@ -11,7 +11,11 @@ export default function IngestOcrStation({
   triggerNotification,
 }: IngestOcrStationProps) {
   const [dragActive, setDragActive] = useState(false);
-  const [rawText, setRawText] = useState('');
+  const [rawText, setRawText] = useState(`### Section 3.2.S.2.6 Manufacturing Process Development (Draft)
+
+The manufacturing process for the Active Substance, AlignedCompound-Alpha, has been optimized at the pilot scale.
+During manufacture, in-process testing is performed to guarantee quality.
+Water content is evaluated using standard Karl Fischer techniques adhering to United Kingdom pharmacopoeial monographs (BP).`);
   const [sectionCodeInput, setSectionCodeInput] = useState('3.2.S.2.6');
   const [titleInput, setTitleInput] = useState('Manufacturing Process Development');
   const [isScanning, setIsScanning] = useState(false);
@@ -244,6 +248,7 @@ During manufacture, in-process testing is performed to guarantee quality.
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs outline-none focus:border-emerald-500 font-mono text-slate-300"
               />
               <button
+                id="ocr-scan-button"
                 onClick={handleTriggerOcrText}
                 disabled={!rawText.trim() || isScanning}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-2 text-xs font-bold transition-all border border-slate-800 hover:border-slate-700 cursor-pointer disabled:opacity-50"
@@ -335,6 +340,7 @@ During manufacture, in-process testing is performed to guarantee quality.
                 </div>
 
                 <button
+                  id="ocr-submit-button"
                   onClick={handleCommitSection}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2 text-xs font-bold transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer"
                 >

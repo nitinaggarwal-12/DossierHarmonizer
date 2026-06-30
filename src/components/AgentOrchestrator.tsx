@@ -421,6 +421,7 @@ export default function AgentOrchestrator({ dossiers, triggerNotification }: Age
           return (
             <button
               key={tab.id}
+              id={`${tab.id}-tab-button`}
               onClick={() => {
                 setActiveTab(tab.id as any);
                 triggerNotification(`Navigated to ${tab.label} section`, 'info');
@@ -466,6 +467,7 @@ export default function AgentOrchestrator({ dossiers, triggerNotification }: Age
                 </div>
 
                 <button
+                  id="agent-execute-button"
                   disabled={isSimulating}
                   onClick={triggerSimulation}
                   className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
@@ -709,6 +711,7 @@ export default function AgentOrchestrator({ dossiers, triggerNotification }: Age
 
                 {/* SEND MCP CLIENT REQUEST BUTTON */}
                 <button
+                  id="mcp-submit-button"
                   disabled={isSendingMcp}
                   onClick={handleSendMcpRequest}
                   className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-indigo-600/10"

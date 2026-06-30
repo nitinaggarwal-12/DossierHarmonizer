@@ -137,6 +137,15 @@ async function runTests() {
     console.log('Waiting for landing page exit transition...');
     await sleep(1500);
 
+    // Take screenshot of Onboarding Selector Modal
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '00a_onboarding_selector.png') });
+    console.log('Captured: 00a_onboarding_selector.png');
+
+    // Click Skip Onboarding to enter the main app
+    console.log('Dismissing onboarding selector...');
+    await page.click('#skip-onboarding-btn');
+    await sleep(1200);
+
     // Take screenshot of Executive Hub
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01_executive_hub.png') });
     console.log('Captured: 01_executive_hub.png');
@@ -230,6 +239,29 @@ async function runTests() {
       await page.screenshot({ path: path.join(SCREENSHOT_DIR, tab.file) });
       console.log(`Captured: ${tab.file}`);
     }
+
+    // 9. Test the Onboarding Tour reactivation and tour card flow
+    console.log('Reopening Onboarding Tour...');
+    await clickElementByText(page, 'Start Guided Tour', 'button');
+    await sleep(1200);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '21_onboarding_reopened.png') });
+    console.log('Captured: 21_onboarding_reopened.png');
+
+    console.log('Selecting Dossier Audit & Gap Analysis workflow...');
+    await clickElementByText(page, 'Dossier Audit & Gap Analysis', 'button');
+    await sleep(1500); // Allow spotlight to calculate coords
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22_tour_spotlight_active.png') });
+    console.log('Captured: 22_tour_spotlight_active.png');
+
+    console.log('Exiting active tour card...');
+    await page.click('#exit-tour-card-btn');
+    await sleep(1000);
+
+    console.log('Closing onboarding selector...');
+    await page.click('#close-onboarding-btn');
+    await sleep(1000);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '23_tour_exited.png') });
+    console.log('Captured: 23_tour_exited.png');
 
     console.log('E2E validation test completed successfully!');
 

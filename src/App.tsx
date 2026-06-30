@@ -33,6 +33,7 @@ import LandingPage from './components/LandingPage';
 import ExecutiveHub from './components/ExecutiveHub';
 import FilingRegistry from './components/FilingRegistry';
 import AgentOrchestrator from './components/AgentOrchestrator';
+import OnboardingTour from './components/OnboardingTour';
 
 import { 
   Dna, 
@@ -109,6 +110,7 @@ export default function App() {
   const [isLightTheme, setIsLightTheme] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [isOnboarding, setIsOnboarding] = useState(true);
 
   // 2. Active Models Lookup
   const currentDossier = dossiers.find(d => d.id === selectedDossierId) || dossiers[0];
@@ -878,6 +880,7 @@ ${s.content}`;
                   <div className="relative">
                     <Briefcase className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-emerald-400 pointer-events-none" />
                     <select
+                      id="sidebar-portfolio-dropdown"
                       value={selectedDossierId}
                       onChange={(e) => handleSelectDossier(e.target.value)}
                       className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-8 pr-2 py-1.5 text-[11px] font-bold text-slate-200 outline-none cursor-pointer transition-colors hover:border-slate-800 focus:border-emerald-500/50"
@@ -903,6 +906,7 @@ ${s.content}`;
                     </label>
 
                     <button 
+                      id="sidebar-present-button"
                       onClick={() => setShowLanding(true)}
                       className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-850 hover:border-slate-800 text-slate-300 rounded-xl py-1.5 text-[10px] font-bold transition-all cursor-pointer active:scale-95"
                     >
@@ -927,6 +931,7 @@ ${s.content}`;
             
             <nav className="space-y-1 px-2">
               <button
+                id="sidebar-dashboard"
                 onClick={() => setActivePage('dashboard')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'dashboard' 
@@ -946,6 +951,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-filing-registry"
                 onClick={() => setActivePage('filing_registry')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'filing_registry' 
@@ -965,6 +971,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-dossier-aligner"
                 onClick={() => setActivePage('dossier_aligner')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'dossier_aligner' 
@@ -984,6 +991,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-gap-matrix"
                 onClick={() => setActivePage('gap_matrix_hub')}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'gap_matrix_hub' 
@@ -1010,6 +1018,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-ingest-ocr"
                 onClick={() => setActivePage('ingest_ocr')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'ingest_ocr' 
@@ -1029,6 +1038,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-harmonizer-chat"
                 onClick={() => setActivePage('harmonizer_chat')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'harmonizer_chat' 
@@ -1048,6 +1058,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-vocab-dict"
                 onClick={() => setActivePage('vocab_dict')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'vocab_dict' 
@@ -1067,6 +1078,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-stability-predictor"
                 onClick={() => setActivePage('stability_predictor')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'stability_predictor' 
@@ -1086,6 +1098,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-ectd-validator"
                 onClick={() => setActivePage('ectd_validator')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'ectd_validator' 
@@ -1105,6 +1118,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-substance-analyzer"
                 onClick={() => setActivePage('substance_analyzer')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'substance_analyzer' 
@@ -1124,6 +1138,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-global-ingress-map"
                 onClick={() => setActivePage('global_ingress_map')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'global_ingress_map' 
@@ -1143,6 +1158,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-audit-history"
                 onClick={() => setActivePage('audit_history')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'audit_history' 
@@ -1162,6 +1178,7 @@ ${s.content}`;
               </button>
 
               <button
+                id="sidebar-agent-orchestrator"
                 onClick={() => setActivePage('agent_orchestrator')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer relative overflow-hidden ${isSidebarMinimized ? 'lg:justify-center lg:px-0' : ''} ${
                   activePage === 'agent_orchestrator' 
@@ -1179,6 +1196,17 @@ ${s.content}`;
                 <Network className="w-4 h-4 shrink-0 z-10" />
                 <span className={`z-10 ${isSidebarMinimized ? 'lg:hidden' : ''}`}>11. Agent Orchestrator & MCP</span>
               </button>
+
+              {/* Start Guided Onboarding Tour Button */}
+              {!isSidebarMinimized && (
+                <button
+                  onClick={() => setIsOnboarding(true)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-pointer mt-2.5"
+                >
+                  <Sparkles className="w-4 h-4 shrink-0 animate-pulse" />
+                  <span>Start Guided Tour</span>
+                </button>
+              )}
             </nav>
           </div>
 
@@ -1485,6 +1513,7 @@ ${s.content}`;
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-slate-900 pb-3 gap-4 shrink-0" id="dossier-sub-tabs-container">
                 <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-900 gap-1 overflow-x-auto scrollbar-none">
                   <button
+                    id="subtab-workspace"
                     onClick={() => setDossierTab('workspace')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap cursor-pointer ${
                       dossierTab === 'workspace'
@@ -1497,6 +1526,7 @@ ${s.content}`;
                   </button>
 
                   <button
+                    id="subtab-pathway"
                     onClick={() => setDossierTab('pathway')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap cursor-pointer ${
                       dossierTab === 'pathway'
@@ -1509,6 +1539,7 @@ ${s.content}`;
                   </button>
 
                   <button
+                    id="subtab-analytics"
                     onClick={() => setDossierTab('analytics')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap cursor-pointer ${
                       dossierTab === 'analytics'
@@ -1521,6 +1552,7 @@ ${s.content}`;
                   </button>
 
                   <button
+                    id="subtab-compiler"
                     onClick={() => setDossierTab('compiler')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap cursor-pointer ${
                       dossierTab === 'compiler'
@@ -1538,6 +1570,7 @@ ${s.content}`;
                   <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-900 text-xs text-slate-300">
                     <span className="text-[10px] text-slate-500 font-mono uppercase font-bold">Target Market:</span>
                     <select
+                      id="target-market-dropdown"
                       value={targetAuthority}
                       onChange={(e) => handleSelectTarget(e.target.value as RegulatoryAuthority)}
                       className="bg-transparent text-emerald-400 font-extrabold outline-none cursor-pointer text-xs"
@@ -2030,6 +2063,7 @@ ${s.content}`;
                             </div>
                             
                             <button
+                              id="export-xml-button"
                               onClick={handleExportXML}
                               className="bg-emerald-600 hover:bg-emerald-500 hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-xs px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-600/15"
                             >
@@ -2288,6 +2322,17 @@ ${s.content}`;
           </div>
         </div>
       </footer>
+
+      {isOnboarding && (
+        <OnboardingTour
+          activePage={activePage}
+          setActivePage={setActivePage}
+          dossierTab={dossierTab}
+          setDossierTab={setDossierTab}
+          onClose={() => setIsOnboarding(false)}
+          triggerNotification={triggerNotification}
+        />
+      )}
 
     </div>
   );
