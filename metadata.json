@@ -1,0 +1,6 @@
+{
+  "name": "Pharma Dossier Harmonizer",
+  "description": "An AI-powered regulatory harmonization platform for eCTD pharmaceutical submission dossiers. Streamline quality, non-clinical, and clinical sections across global health authorities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
