@@ -92,6 +92,12 @@ export default function OnboardingTour({
           title: 'View ROI Presentation',
           description: 'Click "Present" in the sidebar to return to the interactive landing page and view the financial impact calculator.',
           actionType: 'click'
+        },
+        {
+          targetId: 'landing-roi-button',
+          title: 'Calculate Corporate ROI',
+          description: 'Click "Calculate Corporate ROI" to scroll down and visualize your organization\'s potential savings, timeline acceleration, and value unlocked!',
+          actionType: 'click'
         }
       ]
     },

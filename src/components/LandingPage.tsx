@@ -290,6 +290,7 @@ export default function LandingPage({ onExplore }: LandingPageProps) {
               </button>
               
               <a 
+                id="landing-roi-button"
                 href="#roi-calculator" 
                 className="bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/5 hover:border-white/10 font-bold text-sm px-6 py-4.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
               >

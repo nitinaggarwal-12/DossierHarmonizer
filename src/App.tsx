@@ -785,7 +785,21 @@ ${s.content}`;
   const activeSectionResult = harmonizationResults[selectedDossierId]?.[`${currentSection.id}_${targetAuthority}`] || null;
 
   if (showLanding) {
-    return <LandingPage onExplore={() => setShowLanding(false)} />;
+    return (
+      <>
+        <LandingPage onExplore={() => setShowLanding(false)} />
+        {isOnboarding && (
+          <OnboardingTour
+            activePage={activePage}
+            setActivePage={setActivePage}
+            dossierTab={dossierTab}
+            setDossierTab={setDossierTab}
+            onClose={() => setIsOnboarding(false)}
+            triggerNotification={triggerNotification}
+          />
+        )}
+      </>
+    );
   }
 
   return (
