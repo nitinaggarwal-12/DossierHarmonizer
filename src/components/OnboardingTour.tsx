@@ -382,8 +382,8 @@ export default function OnboardingTour({
     if (currentStepIdx >= selectedWorkflow.steps.length - 1) {
       const completedWf = selectedWorkflow;
       setWorkflowId(null);
-      setIsSelectorOpen(true);
       setCurrentStepIdx(0);
+      onClose();
       triggerNotification(`🎉 Completed the "${completedWf.name}" guided journey!`, 'success');
     } else {
       setCurrentStepIdx(prev => prev + 1);
