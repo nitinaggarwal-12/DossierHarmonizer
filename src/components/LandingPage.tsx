@@ -30,9 +30,10 @@ import {
 
 interface LandingPageProps {
   onExplore: () => void;
+  onStartTour: () => void;
 }
 
-export default function LandingPage({ onExplore }: LandingPageProps) {
+export default function LandingPage({ onExplore, onStartTour }: LandingPageProps) {
   // ROI Calculator States
   const [submissionsPerYear, setSubmissionsPerYear] = useState(3);
   const [averageDrugRevenue, setAverageDrugRevenue] = useState(250); // in millions USD
@@ -280,13 +281,21 @@ export default function LandingPage({ onExplore }: LandingPageProps) {
               The Pharma Dossier Harmonizer is an enterprise AI workspace engineered to automatically align, translate, and audit eCTD drug dossiers across the FDA, EMA, PMDA, Swissmedic, and CDSCO. Consolidate months of complex regulatory reframing and pharmacopoeia mapping into minutes of absolute, audited precision.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 pt-2">
               <button
                 onClick={onExplore}
                 className="group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-sm px-8 py-4.5 rounded-xl transition-all duration-300 cursor-pointer shadow-xl shadow-emerald-500/10 flex items-center justify-center gap-2.5 hover:shadow-emerald-500/20 hover:scale-[1.01]"
               >
                 <span>Enter Regulatory Command Center</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </button>
+
+              <button
+                onClick={onStartTour}
+                className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/25 font-bold text-sm px-6 py-4.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
+                <span>Guided Workflows</span>
               </button>
               
               <button 

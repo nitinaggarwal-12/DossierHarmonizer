@@ -110,7 +110,7 @@ export default function App() {
   const [isLightTheme, setIsLightTheme] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
-  const [isOnboarding, setIsOnboarding] = useState(true);
+  const [isOnboarding, setIsOnboarding] = useState(false);
   const [tourWorkflowId, setTourWorkflowId] = useState<string | null>(null);
   const [tourStepIdx, setTourStepIdx] = useState<number>(0);
   const [tourIsSelectorOpen, setTourIsSelectorOpen] = useState<boolean>(true);
@@ -790,7 +790,15 @@ ${s.content}`;
   if (showLanding) {
     return (
       <>
-        <LandingPage onExplore={() => setShowLanding(false)} />
+        <LandingPage 
+          onExplore={() => setShowLanding(false)} 
+          onStartTour={() => {
+            setIsOnboarding(true);
+            setTourWorkflowId(null);
+            setTourStepIdx(0);
+            setTourIsSelectorOpen(true);
+          }}
+        />
         {isOnboarding && (
           <OnboardingTour
             activePage={activePage}

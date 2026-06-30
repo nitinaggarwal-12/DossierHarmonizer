@@ -130,21 +130,27 @@ async function runTests() {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '00_landing_page.png') });
     console.log('Captured: 00_landing_page.png');
 
-    // 4. Enter the application (Click "Enter Regulatory Command Center")
-    await clickElementByText(page, 'Enter Regulatory Command Center', 'button');
-    
-    // Inject mandatory settling delay (minimum 800ms as per the rule)
-    console.log('Waiting for landing page exit transition...');
-    await sleep(1500);
+    // 4. Click "Guided Workflows" to open the Onboarding Selector Modal
+    console.log('Clicking "Guided Workflows" to trigger onboarding...');
+    await clickElementByText(page, 'Guided Workflows', 'button');
+    await sleep(1000);
 
     // Take screenshot of Onboarding Selector Modal
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '00a_onboarding_selector.png') });
     console.log('Captured: 00a_onboarding_selector.png');
 
-    // Click Skip Onboarding to enter the main app
+    // Click Skip Onboarding to close the modal
     console.log('Dismissing onboarding selector...');
     await page.click('#skip-onboarding-btn');
-    await sleep(1200);
+    await sleep(1000);
+
+    // 5. Enter the application (Click "Enter Regulatory Command Center")
+    console.log('Entering the application...');
+    await clickElementByText(page, 'Enter Regulatory Command Center', 'button');
+    
+    // Inject mandatory settling delay (minimum 800ms as per the rule)
+    console.log('Waiting for landing page exit transition...');
+    await sleep(1500);
 
     // Take screenshot of Executive Hub
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01_executive_hub.png') });
