@@ -796,6 +796,7 @@ ${s.content}`;
             setDossierTab={setDossierTab}
             onClose={() => setIsOnboarding(false)}
             triggerNotification={triggerNotification}
+            setShowLanding={setShowLanding}
           />
         )}
       </>
@@ -2345,6 +2346,7 @@ ${s.content}`;
           setDossierTab={setDossierTab}
           onClose={() => setIsOnboarding(false)}
           triggerNotification={triggerNotification}
+          setShowLanding={setShowLanding}
         />
       )}
 

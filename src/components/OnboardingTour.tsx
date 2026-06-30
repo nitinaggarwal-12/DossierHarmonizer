@@ -50,6 +50,7 @@ interface OnboardingTourProps {
   setDossierTab: (tab: string) => void;
   onClose: () => void;
   triggerNotification: (msg: string, type?: 'success' | 'info' | 'error') => void;
+  setShowLanding: (show: boolean) => void;
 }
 
 export default function OnboardingTour({ 
@@ -58,7 +59,8 @@ export default function OnboardingTour({
   dossierTab, 
   setDossierTab, 
   onClose,
-  triggerNotification
+  triggerNotification,
+  setShowLanding
 }: OnboardingTourProps) {
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
@@ -309,6 +311,24 @@ export default function OnboardingTour({
       active = false;
     };
   }, [currentStep, isSelectorOpen, activePage, dossierTab]);
+
+  // Automatically sync showLanding and activePage based on the current step's requirements
+  useEffect(() => {
+    if (isSelectorOpen || !currentStep) return;
+
+    if (currentStep.targetId === 'landing-roi-button') {
+      setShowLanding(true);
+    } else {
+      setShowLanding(false);
+      if (currentStep.expectedPage && currentStep.expectedPage !== activePage) {
+        setActivePage(currentStep.expectedPage);
+      }
+      if (currentStep.expectedSubTab && currentStep.expectedSubTab !== dossierTab) {
+        setDossierTab(currentStep.expectedSubTab);
+      }
+    }
+  }, [currentStep, isSelectorOpen, activePage, dossierTab, setShowLanding, setActivePage, setDossierTab]);
+
 
   // Global bubble listener to detect user actions on the highlighted element
   useEffect(() => {
