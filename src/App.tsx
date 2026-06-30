@@ -111,6 +111,9 @@ export default function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [isOnboarding, setIsOnboarding] = useState(true);
+  const [tourWorkflowId, setTourWorkflowId] = useState<string | null>(null);
+  const [tourStepIdx, setTourStepIdx] = useState<number>(0);
+  const [tourIsSelectorOpen, setTourIsSelectorOpen] = useState<boolean>(true);
 
   // 2. Active Models Lookup
   const currentDossier = dossiers.find(d => d.id === selectedDossierId) || dossiers[0];
@@ -797,6 +800,12 @@ ${s.content}`;
             onClose={() => setIsOnboarding(false)}
             triggerNotification={triggerNotification}
             setShowLanding={setShowLanding}
+            workflowId={tourWorkflowId}
+            setWorkflowId={setTourWorkflowId}
+            currentStepIdx={tourStepIdx}
+            setCurrentStepIdx={setTourStepIdx}
+            isSelectorOpen={tourIsSelectorOpen}
+            setIsSelectorOpen={setTourIsSelectorOpen}
           />
         )}
       </>
@@ -1215,7 +1224,12 @@ ${s.content}`;
               {/* Start Guided Onboarding Tour Button */}
               {!isSidebarMinimized && (
                 <button
-                  onClick={() => setIsOnboarding(true)}
+                  onClick={() => {
+                    setIsOnboarding(true);
+                    setTourWorkflowId(null);
+                    setTourStepIdx(0);
+                    setTourIsSelectorOpen(true);
+                  }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all cursor-pointer mt-2.5"
                 >
                   <Sparkles className="w-4 h-4 shrink-0 animate-pulse" />
@@ -2347,6 +2361,12 @@ ${s.content}`;
           onClose={() => setIsOnboarding(false)}
           triggerNotification={triggerNotification}
           setShowLanding={setShowLanding}
+          workflowId={tourWorkflowId}
+          setWorkflowId={setTourWorkflowId}
+          currentStepIdx={tourStepIdx}
+          setCurrentStepIdx={setTourStepIdx}
+          isSelectorOpen={tourIsSelectorOpen}
+          setIsSelectorOpen={setTourIsSelectorOpen}
         />
       )}
 

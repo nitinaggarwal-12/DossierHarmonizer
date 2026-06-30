@@ -51,6 +51,12 @@ interface OnboardingTourProps {
   onClose: () => void;
   triggerNotification: (msg: string, type?: 'success' | 'info' | 'error') => void;
   setShowLanding: (show: boolean) => void;
+  workflowId: string | null;
+  setWorkflowId: (id: string | null) => void;
+  currentStepIdx: number;
+  setCurrentStepIdx: React.Dispatch<React.SetStateAction<number>>;
+  isSelectorOpen: boolean;
+  setIsSelectorOpen: (open: boolean) => void;
 }
 
 export default function OnboardingTour({ 
@@ -60,12 +66,15 @@ export default function OnboardingTour({
   setDossierTab, 
   onClose,
   triggerNotification,
-  setShowLanding
+  setShowLanding,
+  workflowId,
+  setWorkflowId,
+  currentStepIdx,
+  setCurrentStepIdx,
+  isSelectorOpen,
+  setIsSelectorOpen
 }: OnboardingTourProps) {
-  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
-  const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [highlightCoords, setHighlightCoords] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
-  const [isSelectorOpen, setIsSelectorOpen] = useState(true);
 
   // Define the 6 workflows and their steps
   const workflows: Workflow[] = [
@@ -267,6 +276,7 @@ export default function OnboardingTour({
     }
   ];
 
+  const selectedWorkflow = workflows.find(w => w.id === workflowId) || null;
   const currentStep = selectedWorkflow?.steps[currentStepIdx];
 
   // Effect to track the highlighted element's coordinates in real-time
@@ -371,7 +381,7 @@ export default function OnboardingTour({
     
     if (currentStepIdx >= selectedWorkflow.steps.length - 1) {
       const completedWf = selectedWorkflow;
-      setSelectedWorkflow(null);
+      setWorkflowId(null);
       setIsSelectorOpen(true);
       setCurrentStepIdx(0);
       triggerNotification(`🎉 Completed the "${completedWf.name}" guided journey!`, 'success');
@@ -381,7 +391,7 @@ export default function OnboardingTour({
   };
 
   const handleSelectWorkflow = (wf: Workflow) => {
-    setSelectedWorkflow(wf);
+    setWorkflowId(wf.id);
     setCurrentStepIdx(0);
     setIsSelectorOpen(false);
     
@@ -575,7 +585,7 @@ export default function OnboardingTour({
               <button 
                 id="exit-tour-card-btn"
                 onClick={() => {
-                  setSelectedWorkflow(null);
+                  setWorkflowId(null);
                   setIsSelectorOpen(true);
                   setCurrentStepIdx(0);
                   triggerNotification('Onboarding tour cancelled.', 'info');
@@ -616,7 +626,7 @@ export default function OnboardingTour({
                 <div className="flex justify-between items-center pt-2.5 border-t border-slate-900">
                   <button
                     onClick={() => {
-                      setSelectedWorkflow(null);
+                      setWorkflowId(null);
                       setIsSelectorOpen(true);
                       setCurrentStepIdx(0);
                     }}
