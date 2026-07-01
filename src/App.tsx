@@ -588,6 +588,9 @@ ${s.content}`;
     }).catch(err => console.error('Failed to save new custom section to DB', err));
 
     setSelectedSectionId(newId);
+    setActivePage('dossier_aligner');
+    setDossierTab('workspace');
+    setActiveSidePanel('auditor');
   };
 
   // Mock File Drag & Drop upload flow for real eCTD dossier ingestion
