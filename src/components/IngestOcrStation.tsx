@@ -14,14 +14,24 @@ const COMPLIANCE_TEMPLATES = [
 Adalimumab 40mg solution for injection.
 
 2. QUALITATIVE AND QUANTITATIVE COMPOSITION
-Each 0.4 ml single dose syringe contains 40 mg of adalimumab.
+Each 0.4 ml single dose pre-filled syringe contains 40 mg of adalimumab.
+Adalimumab is a recombinant human monoclonal antibody expressed in Chinese Hamster Ovary (CHO) cells.
+Excipients with known effect: Mannitol (12.0 mg per dose), Polysorbate 80 (0.4 mg per dose), Sodium Chloride, Water for Injections.
 
-3. CLINICAL PARTICULARS
-3.1 Therapeutic indications
-Treatment of moderate to severe active rheumatoid arthritis in adult patients.
+3. PHARMACEUTICAL FORM
+Solution for injection (injection).
+Clear, colorless, sterile aqueous solution. pH is approximately 5.8 ± 0.2.
 
-4. SPECIAL WARNINGS AND PRECAUTIONS FOR USE
-Traceability: In order to improve the traceability of biological medicinal products, the name and the batch number of the administered product should be clearly recorded.`
+4. CLINICAL PARTICULARS
+4.1 Therapeutic indications
+Treatment of moderate to severe active rheumatoid arthritis in adult patients when the response to disease-modifying antirheumatic drugs (DMARDs) including methotrexate has been inadequate.
+
+4.2 Posology and method of administration
+The recommended dose of Adalimumab for adult patients with rheumatoid arthritis is 40 mg administered every other week as a single dose via subcutaneous injection.
+
+4.3 Special warnings and precautions for use
+Traceability: In order to improve the traceability of biological medicinal products, the brand name and the batch number of the administered product must be clearly recorded in the patient file.
+Infections: Patients must be monitored closely for infections, including active tuberculosis, before, during, and after treatment with Adalimumab.`
   },
   {
     id: 'ocr-template-2',
@@ -31,11 +41,21 @@ Traceability: In order to improve the traceability of biological medicinal produ
     description: 'Optimized process design and in-process tests.',
     content: `### Section 3.2.S.2.6 Manufacturing Process Development (Draft)
 
-The manufacturing process for the Active Substance, AlignedCompound-Alpha, has been optimized at the pilot scale.
-During manufacture, in-process testing is performed to guarantee quality.
-1. The purity of intermediates is measured using high performance liquid chromatography (HPLC).
-2. Water content is evaluated using standard Karl Fischer techniques adhering to United Kingdom pharmacopoeial monographs (BP).
-3. Heavy metals tests are conducted following standard European Pharmacopoeia (Ph. Eur. 2.4.8) procedures.`
+1. PROCESS DESIGN & BIOPROCESS OPTIMIZATION
+The manufacturing process for the Active Substance, AlignedCompound-Alpha, has been optimized at the pilot plant scale. 
+ inoculum expansion starts with vial thaw and proceeds through successive seed bioreactors before inoculation of the production bioreactor.
+- Critical Bioreactor Process Parameters: Temperature: 36.5°C ± 0.5°C; pH: 7.20 ± 0.10; Dissolved Oxygen (DO): 40.0% ± 10.0%; Viable Cell Density (VCD) at harvest: > 8.0 x 10^6 cells/mL.
+
+2. PURIFICATION & IN-PROCESS TESTING
+Downstream purification consists of:
+- Primary Harvest Clarification: Centrifugation followed by depth filtration.
+- Protein A Affinity Chromatography: Capture step. Intermediates are tested for purity by size exclusion high performance liquid chromatography (SEC-HPLC).
+- Low pH Viral Inactivation: Harvest pool is adjusted to pH 3.55 ± 0.05 using 1.0 M phosphoric acid and held at 20°C for 60 minutes.
+- Anion Exchange Chromatography (AEX): Flow-through mode for impurity removal.
+
+3. ANALYTICAL COMPLIANCE AND PHARMACOPOEIA STANDARDS
+- Water Content Testing: Evaluated using standard Karl Fischer techniques adhering to British Pharmacopoeia (BP) monographs.
+- Heavy Metals Analysis: Conducted using Inductively Coupled Plasma Mass Spectrometry (ICP-MS) following standard European Pharmacopoeia (Ph. Eur. 2.4.8) procedures.`
   },
   {
     id: 'ocr-template-3',
@@ -45,11 +65,19 @@ During manufacture, in-process testing is performed to guarantee quality.
     description: 'Release specification limits, pH, and sterility tests.',
     content: `### Section 3.2.P.5.1 Specifications for Drug Product Release
 
-The specification parameters for Adalimumab finished drug product release include:
-- Appearance: Clear, colorless to slightly yellow sterile solution.
-- pH: 5.2 - 6.2 (adhering to USP <791> standards).
-- Sterility: Compliant with USP <71> and Ph. Eur. 2.6.1 sterility guidelines.
-- Endotoxins: Not more than 0.25 USP Endotoxin Units per mg.`
+The specification parameters for Adalimumab finished drug product release include the following:
+
+| Test Parameter | Test Method | Acceptance Criteria |
+| :--- | :--- | :--- |
+| Appearance | Visual (Ph. Eur. 2.9.20) | Clear, colorless, free from visible particulate matter |
+| pH | Potentiometric (USP <791>) | 5.2 - 6.2 |
+| Osmolality | Osmometry (USP <785>) | 290 - 350 mOsm/kg |
+| Identity (Active) | SEC-HPLC & Western Blot | Retention time matches standard; positive band match |
+| Purity (Monomer) | SEC-HPLC | >= 98.0% |
+| Charge Variants | cIEF (Acidic/Main/Basic) | Main peak: >= 60.0%; Basic peaks: <= 15.0% |
+| Particulate Matter | Light Obscuration (USP <788>) | >= 10 um: <= 6000/container; >= 25 um: <= 600/container |
+| Bacterial Endotoxins | LAL Gel Clot (USP <85>) | <= 0.25 EU/mg |
+| Sterility | Membrane Filtration (USP <71>) | No growth observed after 14 days of incubation |`
   },
   {
     id: 'ocr-template-4',
@@ -59,9 +87,18 @@ The specification parameters for Adalimumab finished drug product release includ
     description: 'Storage stability and accelerated testing conditions.',
     content: `### Section 3.2.P.8.1 Stability Summary and Conclusion
 
-Stability study results support a shelf-life of 24 months when stored under long-term conditions (5°C ± 3°C).
-Accelerated testing at 25°C ± 2°C / 60% RH ± 5% RH showed no significant changes after 6 months.
-Stress testing was performed to evaluate photostability under ICH Q1B guidelines.`
+1. STABILITY STUDY PROTOCOL DESIGN
+Stability studies are conducted in accordance with ICH Q1A(R2) guidelines to establish drug product shelf-life and storage conditions.
+- Long-term storage condition: 5°C ± 3°C; Testing intervals: 0, 3, 6, 9, 12, 18, 24, and 36 months.
+- Accelerated storage condition: 25°C ± 2°C / 60% RH ± 5% RH; Testing intervals: 0, 1, 2, 3, and 6 months.
+- Photostability: Evaluated under stress conditions using Option 2 light sources matching ICH Q1B guidelines.
+
+2. STABILITY STUDY DATA SUMMARY
+- Accelerated Stability (6 Months): Monomer purity by SEC-HPLC decreased from 99.1% to 98.2% (above the specification limit of >= 97.0%). No significant change in pH or visual appearance was observed. Potency remained within 95.0% - 105.0% of label claim.
+- Long-term Stability (24 Months): Purity remained above 98.5%. No microbial contamination was detected at any test point.
+
+3. SHELF-LIFE PROPOSAL AND CONCLUSION
+Based on the accumulated stability data, a shelf-life of 24 months is proposed for Adalimumab drug product when stored at 2°C to 8°C, protected from light.`
   },
   {
     id: 'ocr-template-5',
@@ -71,9 +108,18 @@ Stress testing was performed to evaluate photostability under ICH Q1B guidelines
     description: 'HDPE storage container, food-contact compliance.',
     content: `### Section 3.2.S.7.1 Container Closure System
 
-The drug substance is stored in high density polyethylene (HDPE) bottles equipped with polypropylene child-resistant closures.
-All packaging materials comply with FDA food-contact standards under 21 CFR 177.1520 guidelines.
-Extractables and leachables profiles were evaluated under USP <661> plastic packaging requirements.`
+1. COMPONENT DESCRIPTION
+The primary container closure system for Adalimumab drug substance storage consists of the following components:
+- Container: High Density Polyethylene (HDPE) bottles equipped with polypropylene child-resistant closures.
+- Plunger Stopper: Fluorocarbon-coated chlorobutyl elastomer plunger stopper complying with USP <381> testing requirements.
+- Syringe: 1 mL Type I borosilicate glass syringe with an integrated 29G thin-wall stainless steel needle and rigid needle shield (RNS).
+
+2. REGULATORY COMPLIANCE AND SAFETY PROFILE
+- Glass Syringe: Borosilicate glass meets hydrolytic resistance standards according to USP <660> and Ph. Eur. 3.2.1.
+- HDPE Bottles: Materials meet food-contact criteria defined in FDA regulations under 21 CFR 177.1520 guidelines.
+
+3. EXTRACTABLES AND LEACHABLES ASSESSMENT
+Controlled extraction studies were conducted using water, isopropyl alcohol, and hexane under USP <661> plastic packaging and USP <1663> / <1664> guidelines. Extractables profiles indicated no detectable heavy metals or organic leachables exceeding safe toxicological thresholds.`
   }
 ];
 
