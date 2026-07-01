@@ -183,7 +183,7 @@ export default function OnboardingTour({
           title: 'Inspect Text Diff',
           description: 'Click the "View Diff" tab to see a side-by-side comparison of the original vs. harmonized text.',
           actionType: 'click',
-          expectedSubTab: 'diff'
+          expectedSubTab: 'workspace'
         }
       ]
     },

@@ -65,6 +65,7 @@ async function runTests() {
 
   let serverProcess;
   let browser;
+  let page;
 
   try {
     // 1. Start the Express server
@@ -116,7 +117,22 @@ async function runTests() {
       defaultViewport: { width: 1440, height: 900 }
     });
 
-    const page = await browser.newPage();
+    page = await browser.newPage();
+
+    // Enable request interception and log all API traffic for debugging
+    page.on('request', request => {
+      const url = request.url();
+      if (url.includes('/api/')) {
+        console.log(`[Browser API Request] ${request.method()} ${url}`);
+      }
+    });
+
+    page.on('response', response => {
+      const url = response.url();
+      if (url.includes('/api/')) {
+        console.log(`[Browser API Response] ${response.status()} ${url}`);
+      }
+    });
 
     // Listen to console logs in the page to catch errors
     page.on('console', msg => {
@@ -216,19 +232,48 @@ async function runTests() {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '23_tour_exited.png') });
     console.log('Captured: 23_tour_exited.png');
 
-    // 7. Trigger the AI Harmonizer
-    console.log('Triggering AI Harmonization...');
-    await clickElementByText(page, 'Trigger Aligner Now', 'button');
+    // Test Workflow 1: Cross-Border Harmonization onboarding tour flow
+    console.log('Reopening Onboarding Tour to test Cross-Border Harmonization workflow...');
+    await clickElementByText(page, 'Start Guided Tour', 'button');
+    await sleep(1200);
     
-    // Wait for harmonization to complete (wait for the loader to disappear or the tabs to appear)
+    console.log('Selecting Cross-Border Harmonization workflow...');
+    await clickElementByText(page, 'Cross-Border Harmonization', 'button');
+    await sleep(1500);
+
+    console.log('Tour 1 Step 1: Navigating to Dossier Aligner...');
+    await page.$eval('#sidebar-dossier-aligner', el => el.click());
+    await sleep(1500);
+
+    console.log('Tour 1 Step 2: Changing target market to PMDA...');
+    await page.select('#target-market-dropdown', 'PMDA');
+    await sleep(1500);
+
+    console.log('Tour 1 Step 3: Triggering Aligner...');
+    await page.$eval('.harmonize-trigger-btn', el => el.click());
+    
     console.log('Waiting for AI Harmonization to complete...');
-    // We can wait for the "View Diff" button to be visible on the page
     await page.waitForFunction(() => {
       const buttons = Array.from(document.querySelectorAll('button'));
       return buttons.some(b => b.textContent && b.textContent.includes('View Diff'));
     }, { timeout: 15000 });
+    await sleep(1500);
+
+    console.log('Tour 1 Step 4: Verifying View Diff spotlight and layout...');
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22b_tour_workflow1_step4.png') });
+    console.log('Captured: 22b_tour_workflow1_step4.png');
+
+    console.log('Exiting active tour card...');
+    await page.$eval('#exit-tour-card-btn', el => el.click());
+    await sleep(1000);
     
-    await sleep(1000); // Additional settling delay
+    console.log('Closing onboarding selector...');
+    await page.$eval('#close-onboarding-btn', el => el.click());
+    await sleep(1000);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '23a_tour_workflow1_exited.png') });
+    console.log('Captured: 23a_tour_workflow1_exited.png');
+
+    // 7. Capture the harmonized alignment state (harmonized during tour above)
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04_dossier_aligner_harmonized.png') });
     console.log('Captured: 04_dossier_aligner_harmonized.png');
 
@@ -298,6 +343,14 @@ async function runTests() {
 
   } catch (error) {
     console.error('Error during E2E validation:', error);
+    if (page) {
+      try {
+        await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'failure_state.png') });
+        console.log('Captured failure_state.png for visual debugging.');
+      } catch (err) {
+        console.error('Failed to capture failure screenshot', err);
+      }
+    }
     process.exitCode = 1;
   } finally {
     // 9. Clean up

@@ -175,7 +175,7 @@ export default function App() {
         setTargetAuthority(targets[0]);
       }
     }
-  }, [selectedDossierId, dossiers]);
+  }, [selectedDossierId]);
 
   // Show temporary notifications
   const triggerNotification = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
