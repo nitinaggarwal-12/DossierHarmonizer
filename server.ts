@@ -990,9 +990,22 @@ app.post('/api/audit-logs', async (req, res) => {
 
 
 // 4. Health Check Endpoint
-app.get('/healthz', (req, res) => {
+app.get('/healthz', async (req, res) => {
+  let dbStatus = 'disconnected';
+  let dbError = null;
+  try {
+    const db = await getDB();
+    await db.query('SELECT 1');
+    dbStatus = 'connected';
+  } catch (err: any) {
+    dbStatus = 'error';
+    dbError = err.message || err.toString();
+  }
+
   res.json({
-    status: 'healthy',
+    status: dbStatus === 'connected' ? 'healthy' : 'unhealthy',
+    database: dbStatus,
+    databaseError: dbError,
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV || 'development',
     apiKeyConfigured: !!process.env.GEMINI_API_KEY
