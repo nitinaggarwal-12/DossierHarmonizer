@@ -14,3 +14,16 @@ When building, auditing, or refactoring guided tours, onboarding steps, or walkt
   - Always provide an alternate path (such as a labeled "Proceed with Default" or "Next Step" tour button) so the user can advance the tour without having to select an incorrect option just to trigger a change event.
 * **Programmatic vs Coordinate Click Validation:**
   - When reviewing screenshots during automated E2E runs, manually review the positioning box of the spotlight overlay and the card bubble to visually confirm the target is fully exposed, visible, and clickable by a human operator.
+
+---
+
+## 📋 RULE: Pre-Project Research & Planning Protocol
+
+### 1. The Constraint
+Before initiating any new coding project, feature addition, or architectural modification, you **must** perform background research, identify technology constraints, map out workarounds, and align on a structured plan with the user. You must never modify code files before this plan is approved.
+
+### 2. The Protocol
+1. **Real-time Grounding Search:** Run a web search or repository review to query the latest guidelines and schemas for the target technology.
+2. **Gotchas Audit:** Search for deprecation warnings, breaking changes, or common integration bugs reported on the targeted frameworks.
+3. **Alternative Workaround Mapping:** Map a clear design mitigation for each identified gotcha.
+4. **Approval Request:** Propose this plan to the user in a clear table/summary. Wait for explicit user confirmation before writing or modifying any implementation code.
