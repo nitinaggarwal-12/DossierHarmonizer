@@ -1,6 +1,82 @@
 import React, { useState } from 'react';
 import { FileUp, ScanLine, Sparkles, AlertCircle, FileText, CheckCircle2, Cpu, HelpCircle } from 'lucide-react';
 
+const COMPLIANCE_TEMPLATES = [
+  {
+    id: 'ocr-template-1',
+    sectionCode: '1.3.1',
+    title: 'Summary of Product Characteristics',
+    standard: 'EMA SmPC',
+    description: 'Product labeling description for clinical particulars.',
+    content: `### Section 1.3.1 Summary of Product Characteristics (SmPC)
+
+1. NAME OF THE MEDICINAL PRODUCT
+Adalimumab 40mg solution for injection.
+
+2. QUALITATIVE AND QUANTITATIVE COMPOSITION
+Each 0.4 ml single dose syringe contains 40 mg of adalimumab.
+
+3. CLINICAL PARTICULARS
+3.1 Therapeutic indications
+Treatment of moderate to severe active rheumatoid arthritis in adult patients.
+
+4. SPECIAL WARNINGS AND PRECAUTIONS FOR USE
+Traceability: In order to improve the traceability of biological medicinal products, the name and the batch number of the administered product should be clearly recorded.`
+  },
+  {
+    id: 'ocr-template-2',
+    sectionCode: '3.2.S.2.6',
+    title: 'Manufacturing Process Development',
+    standard: 'ICH Q6A',
+    description: 'Optimized process design and in-process tests.',
+    content: `### Section 3.2.S.2.6 Manufacturing Process Development (Draft)
+
+The manufacturing process for the Active Substance, AlignedCompound-Alpha, has been optimized at the pilot scale.
+During manufacture, in-process testing is performed to guarantee quality.
+1. The purity of intermediates is measured using high performance liquid chromatography (HPLC).
+2. Water content is evaluated using standard Karl Fischer techniques adhering to United Kingdom pharmacopoeial monographs (BP).
+3. Heavy metals tests are conducted following standard European Pharmacopoeia (Ph. Eur. 2.4.8) procedures.`
+  },
+  {
+    id: 'ocr-template-3',
+    sectionCode: '3.2.P.5.1',
+    title: 'Specifications for Release',
+    standard: 'USP / FDA',
+    description: 'Release specification limits, pH, and sterility tests.',
+    content: `### Section 3.2.P.5.1 Specifications for Drug Product Release
+
+The specification parameters for Adalimumab finished drug product release include:
+- Appearance: Clear, colorless to slightly yellow sterile solution.
+- pH: 5.2 - 6.2 (adhering to USP <791> standards).
+- Sterility: Compliant with USP <71> and Ph. Eur. 2.6.1 sterility guidelines.
+- Endotoxins: Not more than 0.25 USP Endotoxin Units per mg.`
+  },
+  {
+    id: 'ocr-template-4',
+    sectionCode: '3.2.P.8.1',
+    title: 'Stability Summary & Shelf-Life',
+    standard: 'ICH Q1A(R2)',
+    description: 'Storage stability and accelerated testing conditions.',
+    content: `### Section 3.2.P.8.1 Stability Summary and Conclusion
+
+Stability study results support a shelf-life of 24 months when stored under long-term conditions (5°C ± 3°C).
+Accelerated testing at 25°C ± 2°C / 60% RH ± 5% RH showed no significant changes after 6 months.
+Stress testing was performed to evaluate photostability under ICH Q1B guidelines.`
+  },
+  {
+    id: 'ocr-template-5',
+    sectionCode: '3.2.S.7.1',
+    title: 'Container Closure Specifications',
+    standard: '21 CFR / USP',
+    description: 'HDPE storage container, food-contact compliance.',
+    content: `### Section 3.2.S.7.1 Container Closure System
+
+The drug substance is stored in high density polyethylene (HDPE) bottles equipped with polypropylene child-resistant closures.
+All packaging materials comply with FDA food-contact standards under 21 CFR 177.1520 guidelines.
+Extractables and leachables profiles were evaluated under USP <661> plastic packaging requirements.`
+  }
+];
+
 interface IngestOcrStationProps {
   onAddCustomSection: (sectionCode: string, title: string, content: string, gaps: any[]) => void;
   triggerNotification: (message: string, type: 'success' | 'info' | 'error') => void;
@@ -204,6 +280,50 @@ During manufacture, in-process testing is performed to guarantee quality.
           
           <div className="bg-slate-900/30 border border-slate-900 rounded-2xl p-4 space-y-3">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">Step 1: Upload Raw Document</h3>
+
+            {/* Compliance Templates Selection Grid */}
+            <div className="space-y-2 border-b border-slate-900 pb-3">
+              <span className="text-[9px] uppercase font-bold text-slate-500 block">Select Compliance & Industry Standard Template</span>
+              <div className="grid grid-cols-2 gap-2">
+                {COMPLIANCE_TEMPLATES.map((tmpl) => {
+                  const isSelected = sectionCodeInput === tmpl.sectionCode;
+                  return (
+                    <button
+                      key={tmpl.id}
+                      id={tmpl.id}
+                      onClick={() => {
+                        setRawText(tmpl.content);
+                        setSectionCodeInput(tmpl.sectionCode);
+                        setTitleInput(tmpl.title);
+                        setExtractedData(null);
+                        setScanLogs([]);
+                        triggerNotification(`Loaded template standard ${tmpl.standard} for Section ${tmpl.sectionCode}`, 'info');
+                      }}
+                      className={`text-left p-2 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? 'border-emerald-500 bg-emerald-500/5'
+                          : 'border-slate-800 bg-slate-950/40 hover:border-slate-700'
+                      } ${tmpl.id === 'ocr-template-5' ? 'col-span-2' : ''}`}
+                    >
+                      <div className="flex justify-between items-start gap-1 w-full">
+                        <span className="text-[8px] font-bold font-mono text-emerald-400 shrink-0 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                          {tmpl.sectionCode}
+                        </span>
+                        <span className="text-[8px] font-mono text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">
+                          {tmpl.standard}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-200 mt-1.5 block truncate">
+                        {tmpl.title}
+                      </span>
+                      <span className="text-[8px] text-slate-500 mt-0.5 line-clamp-1 leading-relaxed">
+                        {tmpl.description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             
             {/* Drag drop zone */}
             <div 

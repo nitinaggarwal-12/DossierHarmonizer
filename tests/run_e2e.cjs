@@ -351,16 +351,22 @@ async function runTests() {
     console.log('Tour 3 Step 1: Navigating to Ingest & OCR Station...');
     await page.$eval('#sidebar-ingest-ocr', el => el.click());
     await sleep(1500);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22e_tour_workflow3_step2_spotlight.png') });
+    console.log('Captured: 22e_tour_workflow3_step2_spotlight.png');
 
-    console.log('Ingesting OCR text stream...');
+    console.log('Tour 3 Step 2: Clicking Compliance Template Card...');
+    await page.$eval('#ocr-template-2', el => el.click());
+    await sleep(1500);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22f_tour_workflow3_step3_spotlight.png') });
+    console.log('Captured: 22f_tour_workflow3_step3_spotlight.png');
+
+    console.log('Tour 3 Step 3: Clicking Scan Text Stream with OCR...');
     await page.$eval('#ocr-scan-button', el => el.click());
-    await sleep(4000); // Wait for OCR parsing to complete and render the fields
+    await sleep(4500); // Wait for OCR simulation logs to run and complete
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22g_tour_workflow3_step4_spotlight.png') });
+    console.log('Captured: 22g_tour_workflow3_step4_spotlight.png');
 
-    console.log('Tour 3 Step 2: Typing custom section title...');
-    await page.type('#ocr-title-input', '3.2.S.1.3');
-    await sleep(1000);
-
-    console.log('Tour 3 Step 3: Triggering Create & Audit Section...');
+    console.log('Tour 3 Step 4: Saving Scanned Node into Dossier...');
     await page.$eval('#ocr-submit-button', el => el.click());
     await sleep(2000);
 

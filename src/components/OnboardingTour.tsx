@@ -202,16 +202,23 @@ export default function OnboardingTour({
           expectedPage: 'ingest_ocr'
         },
         {
-          targetId: 'ocr-title-input',
-          title: 'Name Your Custom Section',
-          description: 'Type a section code or title (e.g., "3.2.S.1.3") in the input box to prepare the document metadata. Please type at least 3 characters.',
-          actionType: 'input',
+          targetId: 'ocr-template-2',
+          title: 'Select Compliance Template',
+          description: 'Select a pre-loaded industry standard template (e.g., Module 3.2.S.2.6 Manufacturing Process Development) to automatically populate conforming regulatory text.',
+          actionType: 'click',
+          cardPlacement: 'left'
+        },
+        {
+          targetId: 'ocr-scan-button',
+          title: 'Scan Text Stream with OCR',
+          description: 'Click the "Scan Text Stream with OCR" button to trigger the character extraction pipeline and run character mapping diagnostics.',
+          actionType: 'click',
           cardPlacement: 'left'
         },
         {
           targetId: 'ocr-submit-button',
-          title: 'Create & Audit Section',
-          description: 'Click "Create & Audit Section" to ingest the document and run an automated compliance scan.',
+          title: 'Save Scanned Node into Dossier',
+          description: 'Click the "Save Scanned Node into Dossier Navigator" button to commit this compliance-scanned document to the active eCTD tree.',
           actionType: 'click',
           cardPlacement: 'left'
         }
