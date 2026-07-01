@@ -75,6 +75,7 @@ export default function OnboardingTour({
   setIsSelectorOpen
 }: OnboardingTourProps) {
   const [highlightCoords, setHighlightCoords] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [completedWorkflow, setCompletedWorkflow] = useState<Workflow | null>(null);
 
   // Define the 6 workflows and their steps
   const workflows: Workflow[] = [
@@ -383,7 +384,7 @@ export default function OnboardingTour({
       const completedWf = selectedWorkflow;
       setWorkflowId(null);
       setCurrentStepIdx(0);
-      onClose();
+      setCompletedWorkflow(completedWf);
       triggerNotification(`🎉 Completed the "${completedWf.name}" guided journey!`, 'success');
     } else {
       setCurrentStepIdx(prev => prev + 1);
@@ -646,6 +647,69 @@ export default function OnboardingTour({
                     </button>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        {completedWorkflow && (
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="bg-slate-900/90 border border-slate-800 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6"
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+              {/* Celebration Icon */}
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20">
+                <Check className="w-8 h-8 font-black" />
+              </div>
+
+              {/* Title & Info */}
+              <div className="space-y-2">
+                <span className="text-[9px] font-mono font-bold tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full uppercase">
+                  Journey Completed Successfully
+                </span>
+                <h3 className="text-xl font-black text-white uppercase tracking-tight pt-1">
+                  {completedWorkflow.name}
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed font-sans font-normal px-2">
+                  You've successfully walked through this guided journey and experienced how Pharma Dossier Harmonizer accelerates global drug filings.
+                </p>
+              </div>
+
+              {/* Advise Message Box */}
+              <div className="p-4 bg-slate-950 border border-slate-850 rounded-2xl text-[11px] text-slate-300 leading-relaxed text-left flex gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5 animate-pulse" />
+                <div>
+                  <span className="font-bold text-slate-200 block mb-0.5">Explore More Workflows</span>
+                  To gain a complete understanding of all platform modalities (such as OCR document ingestion, climate stability mapping, or GxP CFR audit databases), we highly recommend selecting and exploring another guided workflow.
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="w-full flex flex-col gap-2.5 pt-2">
+                <button
+                  onClick={() => {
+                    setCompletedWorkflow(null);
+                    setIsSelectorOpen(true);
+                  }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-emerald-600/15 uppercase tracking-wider active:scale-[0.98]"
+                >
+                  Select Another Workflow
+                </button>
+                <button
+                  onClick={() => {
+                    setCompletedWorkflow(null);
+                    onClose();
+                  }}
+                  className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:text-slate-200 font-bold text-xs py-3 rounded-xl transition-all cursor-pointer uppercase tracking-wider active:scale-[0.98]"
+                >
+                  Close & Explore Freely
+                </button>
               </div>
             </motion.div>
           </div>
