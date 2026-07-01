@@ -7,6 +7,9 @@ import { createServer as createViteServer } from 'vite';
 // Load environment variables
 dotenv.config();
 
+import { getDB, initializeDatabase } from './src/db';
+import crypto from 'crypto';
+
 const app = express();
 
 // Custom Structured JSON Logger
@@ -156,6 +159,19 @@ Identify 1 to 3 distinct regulatory, terminology, formatting, or data gaps. For 
 
 Your response must be returned in JSON matching the defined schema structure. Let's think step by step to find realistic, high-fidelity gaps.`;
 
+  const cacheKey = crypto.createHash('sha256').update(content + targetAuthority + 'analyze-gaps').digest('hex');
+  try {
+    const db = await getDB();
+    const cached = await db.query('SELECT response_text FROM api_cache WHERE hash = $1', [cacheKey]);
+    if (cached.length > 0) {
+      logger.info('Returning cached gap analysis results.', { sectionId, targetAuthority });
+      const responseText = cached[0].response_text || cached[0].RESPONSE_TEXT || '{}';
+      return res.json(JSON.parse(responseText.trim()));
+    }
+  } catch (cacheErr) {
+    logger.warn('Failed to query database cache', cacheErr);
+  }
+
   if (ai) {
     try {
       const response = await ai.models.generateContent({
@@ -192,6 +208,18 @@ Your response must be returned in JSON matching the defined schema structure. Le
 
       const responseText = response.text || '{}';
       const parsed = JSON.parse(responseText.trim());
+
+      // Save to cache
+      try {
+        const db = await getDB();
+        await db.query(
+          'INSERT INTO api_cache (hash, response_text) VALUES ($1, $2)',
+          [cacheKey, responseText]
+        );
+      } catch (cacheWriteErr) {
+        logger.warn('Failed to write response to api_cache', cacheWriteErr);
+      }
+
       return res.json(parsed);
     } catch (error: any) {
       logger.error('Error in analyze-gaps endpoint via Gemini', error, { sectionId, targetAuthority });
@@ -277,6 +305,26 @@ Please perform the following steps:
 
 Your response must be structured in JSON matching the specified schema. Keep the markdown formatting in harmonizedContent looking clean, premium, and fully professional. Let's think step by step to generate a highly convincing pharmaceutical translation.`;
 
+  const cacheKey = crypto.createHash('sha256').update(content + targetAuthority + 'harmonize').digest('hex');
+  try {
+    const db = await getDB();
+    const cached = await db.query('SELECT response_text FROM api_cache WHERE hash = $1', [cacheKey]);
+    if (cached.length > 0) {
+      logger.info('Returning cached harmonization results.', { sectionId, targetAuthority });
+      const responseText = cached[0].response_text || cached[0].RESPONSE_TEXT || '{}';
+      const parsed = JSON.parse(responseText.trim());
+      return res.json({
+        sectionId,
+        sourceAuthority,
+        targetAuthority,
+        originalContent: content,
+        ...parsed
+      });
+    }
+  } catch (cacheErr) {
+    logger.warn('Failed to query database cache', cacheErr);
+  }
+
   if (ai) {
     try {
       const response = await ai.models.generateContent({
@@ -317,6 +365,18 @@ Your response must be structured in JSON matching the specified schema. Keep the
 
       const responseText = response.text || '{}';
       const parsed = JSON.parse(responseText.trim());
+
+      // Save to cache
+      try {
+        const db = await getDB();
+        await db.query(
+          'INSERT INTO api_cache (hash, response_text) VALUES ($1, $2)',
+          [cacheKey, responseText]
+        );
+      } catch (cacheWriteErr) {
+        logger.warn('Failed to write response to api_cache', cacheWriteErr);
+      }
+
       return res.json({
         sectionId,
         sourceAuthority,
@@ -693,6 +753,242 @@ app.post('/api/mcp', (req, res) => {
 });
 
 
+// --- DATABASE PERSISTENT REST API ENDPOINTS ---
+
+// Fetch all dossiers
+app.get('/api/dossiers', async (req, res) => {
+  try {
+    const db = await getDB();
+    const rows = await db.query('SELECT * FROM dossiers');
+    
+    // Format response to match DemoDossier type
+    const formatted = rows.map(r => ({
+      id: r.id,
+      drugName: r.drug_name || r.drugName,
+      dossierType: r.dossier_type || r.dossierType,
+      sourceAuthority: r.source_authority || r.sourceAuthority,
+      targetAuthorities: (r.target_authorities || r.targetAuthorities || '').split(',').map((t: string) => t.trim()),
+      status: r.status,
+      readOnly: !!(r.read_only || r.readOnly)
+    }));
+    
+    return res.json(formatted);
+  } catch (err: any) {
+    logger.error('Error fetching dossiers from database', err);
+    return res.status(500).json({ error: 'Internal Server Error', code: 'DB_ERROR' });
+  }
+});
+
+// Fetch all sections of a dossier with their nested compliance gaps
+app.get('/api/dossiers/:dossierId/sections', async (req, res) => {
+  const { dossierId } = req.params;
+  try {
+    const db = await getDB();
+    
+    // Fetch all sections
+    const sectionRows = await db.query('SELECT * FROM sections WHERE dossier_id = $1 ORDER BY order_index ASC', [dossierId]);
+    
+    // Fetch all gaps associated with these sections
+    const gapRows = await db.query(
+      `SELECT g.* FROM gaps g 
+       JOIN sections s ON g.section_id = s.id 
+       WHERE s.dossier_id = $1`, 
+      [dossierId]
+    );
+
+    // Group gaps by section_id
+    const gapsBySection: Record<string, any[]> = {};
+    gapRows.forEach(g => {
+      const secId = g.section_id || g.sectionId;
+      if (!gapsBySection[secId]) gapsBySection[secId] = [];
+      gapsBySection[secId].push({
+        id: g.id,
+        severity: g.severity,
+        category: g.category,
+        section: g.section,
+        title: g.title,
+        description: g.description,
+        guidelineCitation: g.guideline_citation || g.guidelineCitation,
+        suggestion: g.suggestion,
+        status: g.status
+      });
+    });
+
+    // Format sections with their gaps
+    const formattedSections = sectionRows.map(s => ({
+      id: s.id,
+      sectionCode: s.section_code || s.sectionCode,
+      title: s.title,
+      content: s.content,
+      status: s.status,
+      gaps: gapsBySection[s.id] || []
+    }));
+
+    return res.json(formattedSections);
+  } catch (err: any) {
+    logger.error('Error fetching dossier sections', err, { dossierId });
+    return res.status(500).json({ error: 'Internal Server Error', code: 'DB_ERROR' });
+  }
+});
+
+// Update section content (Apply edits or harmonization)
+app.put('/api/sections/:sectionId', async (req, res) => {
+  const { sectionId } = req.params;
+  const { content, status, userId, actionType, beforeValue } = req.body;
+
+  try {
+    const db = await getDB();
+    
+    // Update section content
+    await db.query(
+      'UPDATE sections SET content = $1, status = $2 WHERE id = $3',
+      [content, status || 'in_progress', sectionId]
+    );
+
+    // Log the change in audit_logs
+    if (userId) {
+      await db.query(
+        `INSERT INTO audit_logs (user_id, action_type, section_code, before_value, after_value)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [userId, actionType || 'manual_edit', sectionId, beforeValue || '', content]
+      );
+      logger.info('Audit log successfully recorded', { userId, actionType, sectionId });
+    }
+
+    return res.json({ success: true, sectionId, status });
+  } catch (err: any) {
+    logger.error('Error updating section content', err, { sectionId });
+    return res.status(500).json({ error: 'Internal Server Error', code: 'DB_ERROR' });
+  }
+});
+
+// Create a new scanned section (OCR Upload Ingestion)
+app.post('/api/sections', async (req, res) => {
+  const { id, dossierId, sectionCode, title, content, status, userId } = req.body;
+
+  try {
+    const db = await getDB();
+
+    // Check if section already exists to prevent duplicate primary keys
+    const existing = await db.query('SELECT id FROM sections WHERE id = $1', [id]);
+    if (existing.length > 0) {
+      // Overwrite/Update existing node content
+      await db.query(
+        'UPDATE sections SET content = $1, title = $2, section_code = $3 WHERE id = $4',
+        [content, title, sectionCode, id]
+      );
+    } else {
+      // Insert new section
+      await db.query(
+        `INSERT INTO sections (id, dossier_id, section_code, title, content, status, order_index)
+         VALUES ($1, $2, $3, $4, $5, $6, (SELECT COALESCE(MAX(order_index), 0) + 1 FROM sections WHERE dossier_id = $7))`,
+        [id, dossierId || 'dossier-adalimumab', sectionCode, title, content, status || 'in_progress', dossierId || 'dossier-adalimumab']
+      );
+    }
+
+    // Automatically analyze compliance gaps for this new section in the background
+    // (mock gap analysis trigger for simplicity)
+    await db.query('DELETE FROM gaps WHERE section_id = $1', [id]);
+    await db.query(
+      `INSERT INTO gaps (id, section_id, severity, category, section, title, description, guideline_citation, suggestion, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        `gap-ocr-${id}`, 
+        id, 
+        'warning', 
+        'Formatting', 
+        sectionCode, 
+        'Regulatory Template Realignment Check Needed', 
+        'This scanned node was ingested via optical character recognition. Verify terms align with target authority guidelines.', 
+        'ICH M4Q General Guidelines', 
+        'Verify target terminology and execute AI harmonization checks.',
+        'pending'
+      ]
+    );
+
+    // Record in audit trail logs
+    if (userId) {
+      await db.query(
+        `INSERT INTO audit_logs (user_id, action_type, section_code, before_value, after_value)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [userId, 'ocr_ingestion', sectionCode || id, '', `Section: ${title} uploaded and parsed.`]
+      );
+    }
+
+    return res.json({ success: true, id, sectionCode, title });
+  } catch (err: any) {
+    logger.error('Error creating custom ingested section', err, { id });
+    return res.status(500).json({ error: 'Internal Server Error', code: 'DB_ERROR' });
+  }
+});
+
+// Resolve a specific compliance gap
+app.post('/api/gaps/:gapId/resolve', async (req, res) => {
+  const { gapId } = req.params;
+  const { userId, sectionCode } = req.body;
+
+  try {
+    const db = await getDB();
+    
+    // Update status to resolved
+    await db.query('UPDATE gaps SET status = $1 WHERE id = $2', ['resolved', gapId]);
+
+    // Record in audit trail logs
+    if (userId) {
+      await db.query(
+        `INSERT INTO audit_logs (user_id, action_type, section_code, before_value, after_value)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [userId, 'resolve_gap', sectionCode || 'Gap', 'pending', 'resolved']
+      );
+    }
+
+    return res.json({ success: true, gapId, status: 'resolved' });
+  } catch (err: any) {
+    logger.error('Error resolving gap in database', err, { gapId });
+    return res.status(500).json({ error: 'Internal Server Error', code: 'DB_ERROR' });
+  }
+});
+
+// Fetch all audit trail logs (CFR Compliant Database Log stream)
+app.get('/api/audit-logs', async (req, res) => {
+  try {
+    const db = await getDB();
+    const rows = await db.query('SELECT * FROM audit_logs ORDER BY timestamp DESC');
+    
+    const formatted = rows.map(r => ({
+      id: String(r.id),
+      timestamp: r.timestamp,
+      userId: r.user_id || r.userId,
+      action: r.action_type || r.actionType,
+      sectionCode: r.section_code || r.sectionCode,
+      details: `Changed from "${(r.before_value || '').substring(0, 40)}..." to "${(r.after_value || '').substring(0, 40)}..."`
+    }));
+
+    return res.json(formatted);
+  } catch (err: any) {
+    logger.error('Error fetching audit logs', err);
+    return res.status(500).json({ error: 'Internal Server Error', code: 'DB_ERROR' });
+  }
+});
+
+// Post a manual audit trail log entry
+app.post('/api/audit-logs', async (req, res) => {
+  const { userId, action, sectionCode, details } = req.body;
+  try {
+    const db = await getDB();
+    await db.query(
+      `INSERT INTO audit_logs (user_id, action_type, section_code, before_value, after_value)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId || 'Unknown', action || 'system_event', sectionCode || 'System', '', details || '']
+    );
+    return res.json({ success: true });
+  } catch (err: any) {
+    logger.error('Error posting manual audit log', err);
+    return res.status(500).json({ error: 'Internal Server Error', code: 'DB_ERROR' });
+  }
+});
+
+
 // 4. Health Check Endpoint
 app.get('/healthz', (req, res) => {
   res.json({
@@ -705,6 +1001,13 @@ app.get('/healthz', (req, res) => {
 
 // Serve Vite or static assets depending on environment
 async function startServer() {
+  try {
+    await initializeDatabase();
+    logger.info('Database initialized successfully on server start.');
+  } catch (dbErr) {
+    logger.error('Failed to initialize database on startup', dbErr);
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     // In dev, run Vite inside Express middleware
     const vite = await createViteServer({

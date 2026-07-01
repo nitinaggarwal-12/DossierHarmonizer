@@ -80,7 +80,7 @@ export default function App() {
   // 1. Core State
   const [dossiers, setDossiers] = useState<DemoDossier[]>(DEMO_DOSSIERS);
   const [selectedDossierId, setSelectedDossierId] = useState<string>(DEMO_DOSSIERS[0].id);
-  const [selectedSectionId, setSelectedSectionId] = useState<string>(DEMO_DOSSIERS[0].sections[1].id); // Select section 1.3
+  const [selectedSectionId, setSelectedSectionId] = useState<string>(DEMO_DOSSIERS[0].sections[0].id);
   const [targetAuthority, setTargetAuthority] = useState<RegulatoryAuthority>('FDA');
 
   const [harmonizationResults, setHarmonizationResults] = useState<Record<string, Record<string, HarmonizationResult>>>({});
@@ -116,8 +116,56 @@ export default function App() {
   const [tourIsSelectorOpen, setTourIsSelectorOpen] = useState<boolean>(true);
 
   // 2. Active Models Lookup
-  const currentDossier = dossiers.find(d => d.id === selectedDossierId) || dossiers[0];
-  const currentSection = currentDossier.sections.find(s => s.id === selectedSectionId) || currentDossier.sections[0];
+  const currentDossier = dossiers.find(d => d.id === selectedDossierId) || dossiers[0] || { sections: [], targetAuthorities: [] };
+  const currentSection = currentDossier?.sections?.find(s => s.id === selectedSectionId) || currentDossier?.sections?.[0] || { id: '', sectionCode: '', title: '', content: '', gaps: [] };
+
+  // Load dossiers from database on mount
+  useEffect(() => {
+    fetch('/api/dossiers')
+      .then(res => {
+        if (!res.ok) throw new Error('Database not initialized');
+        return res.json();
+      })
+      .then(data => {
+        if (data && data.length > 0) {
+          // Initialize empty sections array to prevent undefined lookup crashes during loading state
+          const initialized = data.map((d: any) => ({ ...d, sections: d.sections || [] }));
+          setDossiers(initialized);
+          setSelectedDossierId(data[0].id);
+        }
+      })
+      .catch(err => {
+        console.warn('Failed to connect to backend database. Running with hardcoded config fallback.', err);
+      });
+  }, []);
+
+  // Fetch sections and their nested gaps when dossier updates
+  useEffect(() => {
+    if (!selectedDossierId) return;
+    
+    fetch(`/api/dossiers/${selectedDossierId}/sections`)
+      .then(res => {
+        if (!res.ok) throw new Error('API Error');
+        return res.json();
+      })
+      .then(sections => {
+        if (sections && sections.length > 0) {
+          setDossiers(prev => prev.map(d => {
+            if (d.id === selectedDossierId) {
+              return { ...d, sections };
+            }
+            return d;
+          }));
+
+          // Set default selected section as the first leaf node with gaps
+          const firstWithGaps = sections.find((s: any) => s.gaps && s.gaps.length > 0);
+          setSelectedSectionId(firstWithGaps ? firstWithGaps.id : sections[0].id);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching dynamic sections', err);
+      });
+  }, [selectedDossierId]);
 
   // Adjust default target authority when dossier changes
   useEffect(() => {
@@ -126,15 +174,8 @@ export default function App() {
       if (targets && targets.length > 0) {
         setTargetAuthority(targets[0]);
       }
-      // Set default selected section as the first leaf node with gaps
-      const firstSectionWithGaps = currentDossier.sections.find(s => s.gaps && s.gaps.length > 0);
-      if (firstSectionWithGaps) {
-        setSelectedSectionId(firstSectionWithGaps.id);
-      } else {
-        setSelectedSectionId(currentDossier.sections[0].id);
-      }
     }
-  }, [selectedDossierId]);
+  }, [selectedDossierId, dossiers]);
 
   // Show temporary notifications
   const triggerNotification = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
@@ -214,6 +255,23 @@ export default function App() {
           [`${currentSection.id}_${targetAuthority}`]: result
         }
       }));
+
+      // Persist to backend database
+      try {
+        await fetch(`/api/sections/${currentSection.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: result.harmonizedContent,
+            status: 'compliant',
+            userId: 'Harmonizer-AI',
+            actionType: 'ai_harmonization',
+            beforeValue: currentSection.content
+          })
+        });
+      } catch (dbWriteErr) {
+        console.error('Failed to persist harmonized content in DB', dbWriteErr);
+      }
 
       // Update current section's status in memory to "compliant"
       setDossiers(prevDossiers => {
@@ -322,6 +380,25 @@ ${s.content}`;
                 } else if (gapId === 'gap-m3-2') {
                   updatedContent = `${s.content}\n\n**Viral Safety Compliance Sub-section (Japan PMDA):**\n- Clearances have been validated using localized Japanese isolates of Pseudorabies Virus (PRV) and Bovine Viral Diarrhea Virus (BVDV), demonstrating robust reduction logs compliant with PMDA Notification 1121001.`;
                 }
+
+                // Persist the changes to the database
+                fetch(`/api/gaps/${gapId}/resolve`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: 'User-Auditor', sectionCode: s.sectionCode || s.id })
+                }).catch(err => console.error('Failed to resolve gap in DB', err));
+
+                fetch(`/api/sections/${targetSectionId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    content: updatedContent,
+                    status: allResolved ? 'compliant' : 'warning',
+                    userId: 'User-Auditor',
+                    actionType: 'resolve_gap',
+                    beforeValue: s.content
+                  })
+                }).catch(err => console.error('Failed to update section text in DB', err));
 
                 return {
                   ...s,
@@ -448,6 +525,19 @@ ${s.content}`;
       return prev;
     });
 
+    // Persist manual edits to backend DB
+    fetch(`/api/sections/${currentSection.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: editedContent,
+        status: currentSection.status || 'in_progress',
+        userId: 'User-Manual-Editor',
+        actionType: 'manual_edit',
+        beforeValue: currentSection.content
+      })
+    }).catch(err => console.error('Failed to save manual edits to DB', err));
+
     triggerNotification('Manual adjustments successfully committed.', 'success');
   };
 
@@ -481,6 +571,21 @@ ${s.content}`;
       }
       return d;
     }));
+
+    // Persist custom section to DB
+    fetch('/api/sections', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: newId,
+        dossierId: selectedDossierId,
+        sectionCode,
+        title,
+        content,
+        status: gaps.length > 0 ? 'warning' : 'compliant',
+        userId: 'User-OCR-Uploader'
+      })
+    }).catch(err => console.error('Failed to save new custom section to DB', err));
 
     setSelectedSectionId(newId);
   };

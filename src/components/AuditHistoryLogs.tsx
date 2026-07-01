@@ -18,11 +18,37 @@ const INITIAL_LOGS: LogItem[] = [
 ];
 
 interface AuditHistoryLogsProps {
-  triggerNotification: (message: string, type: 'success' | 'info' | 'error') => void;
+  triggerNotification?: (message: string, type: 'success' | 'info' | 'error') => void;
+  onClose?: () => void;
 }
 
-export default function AuditHistoryLogs({ triggerNotification }: AuditHistoryLogsProps) {
-  const [logs, setLogs] = useState<LogItem[]>(INITIAL_LOGS);
+export default function AuditHistoryLogs({ triggerNotification, onClose }: AuditHistoryLogsProps) {
+  const [logs, setLogs] = useState<LogItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load audit trail from database
+  React.useEffect(() => {
+    fetch('/api/audit-logs')
+      .then(res => res.json())
+      .then(data => {
+        const mapped = data.map((item: any) => ({
+          id: item.id,
+          timestamp: item.timestamp || new Date().toISOString(),
+          event: `${item.action.toUpperCase()}: ${item.details || ''} (Section: ${item.sectionCode || 'General'})`,
+          category: item.action === 'ai_harmonization' ? 'AI Harmonizer' : 
+                    item.action === 'manual_edit' ? 'Manual Edit' :
+                    item.action === 'resolve_gap' ? 'Gap Resolution' : 
+                    item.action === 'ocr_ingestion' ? 'System' : 'System',
+          status: item.action.includes('error') ? 'warning' : 'success'
+        }));
+        setLogs(mapped);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch audit logs from DB', err);
+        setIsLoading(false);
+      });
+  }, []);
   
   // Custom log generator state
   const [customEvent, setCustomEvent] = useState('');
@@ -32,22 +58,44 @@ export default function AuditHistoryLogs({ triggerNotification }: AuditHistoryLo
     e.preventDefault();
     if (!customEvent.trim()) return;
 
-    const newLog: LogItem = {
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
-      event: customEvent.trim(),
-      category: customCat,
-      status: 'success'
-    };
-
-    setLogs([newLog, ...logs]);
-    setCustomEvent('');
-    triggerNotification("Custom event committed to audit history trail.", "success");
+    fetch('/api/audit-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: 'User-Auditor',
+        action: customCat === 'AI Harmonizer' ? 'ai_harmonization' : 
+                customCat === 'Manual Edit' ? 'manual_edit' :
+                customCat === 'Gap Resolution' ? 'resolve_gap' : 'system_event',
+        sectionCode: 'Audit simulation',
+        details: customEvent.trim()
+      })
+    })
+    .then(res => res.json())
+    .then(() => {
+      return fetch('/api/audit-logs');
+    })
+    .then(res => res.json())
+    .then(data => {
+      const mapped = data.map((item: any) => ({
+        id: item.id,
+        timestamp: item.timestamp || new Date().toISOString(),
+        event: `${item.action.toUpperCase()}: ${item.details || ''} (Section: ${item.sectionCode || 'General'})`,
+        category: item.action === 'ai_harmonization' ? 'AI Harmonizer' : 
+                  item.action === 'manual_edit' ? 'Manual Edit' :
+                  item.action === 'resolve_gap' ? 'Gap Resolution' : 
+                  item.action === 'ocr_ingestion' ? 'System' : 'System',
+        status: item.action.includes('error') ? 'warning' : 'success'
+      }));
+      setLogs(mapped);
+      setCustomEvent('');
+      if (triggerNotification) triggerNotification("Custom event committed to audit history trail.", "success");
+    })
+    .catch(err => console.error(err));
   };
 
   const handleClearLogs = () => {
     setLogs([]);
-    triggerNotification("Audit history trail successfully cleared.", "info");
+    if (triggerNotification) triggerNotification("Audit history trail successfully cleared.", "info");
   };
 
   const handleDownloadLogs = () => {
