@@ -32,6 +32,7 @@ interface TourStep {
   expectedPage?: string; // If the step expects a specific page/tab to be active
   expectedSubTab?: string;
   expectedSidePanel?: 'auditor' | 'chat';
+  cardPlacement?: 'left' | 'right';
 }
 
 // Define a workflow
@@ -144,7 +145,8 @@ export default function OnboardingTour({
           title: 'Remedy a Compliance Gap',
           description: 'Click the "Auto-Remediate Gap" button on the first gap in the checklist. The AI will patch the text in memory and resolve the issue.',
           actionType: 'click',
-          expectedSidePanel: 'auditor'
+          expectedSidePanel: 'auditor',
+          cardPlacement: 'left'
         }
       ]
     },
@@ -166,7 +168,8 @@ export default function OnboardingTour({
           targetId: 'target-market-dropdown',
           title: 'Select Target Market',
           description: 'Change the Target Market dropdown to "PMDA" or "FDA" to load region-specific pharmacopoeia rules.',
-          actionType: 'change'
+          actionType: 'change',
+          cardPlacement: 'left'
         },
         {
           targetId: '.harmonize-trigger-btn',
@@ -201,13 +204,15 @@ export default function OnboardingTour({
           targetId: 'ocr-title-input',
           title: 'Name Your Custom Section',
           description: 'Type a section code or title (e.g., "3.2.S.1.3") in the input box to prepare the document metadata. Please type at least 3 characters.',
-          actionType: 'input'
+          actionType: 'input',
+          cardPlacement: 'left'
         },
         {
           targetId: 'ocr-submit-button',
           title: 'Create & Audit Section',
           description: 'Click "Create & Audit Section" to ingest the document and run an automated compliance scan.',
-          actionType: 'click'
+          actionType: 'click',
+          cardPlacement: 'left'
         }
       ]
     },
@@ -243,7 +248,8 @@ export default function OnboardingTour({
           targetId: 'export-xml-button',
           title: 'Export eCTD Package',
           description: 'Click the "Export to eCTD XML" button to compile and download your compliant XML submission package.',
-          actionType: 'click'
+          actionType: 'click',
+          cardPlacement: 'left'
         }
       ]
     },
@@ -265,19 +271,22 @@ export default function OnboardingTour({
           targetId: 'agent-execute-button',
           title: 'Execute Agent Campaign',
           description: 'Click the "Execute Campaign" button to watch the 4-Agent pipeline run sequentially in the background.',
-          actionType: 'click'
+          actionType: 'click',
+          cardPlacement: 'left'
         },
         {
           targetId: 'mcp-tab-button',
           title: 'Switch to MCP Console',
           description: 'Click on the "2. Model Context Protocol (MCP)" tab in the orchestrator header.',
-          actionType: 'click'
+          actionType: 'click',
+          cardPlacement: 'left'
         },
         {
           targetId: 'mcp-submit-button',
           title: 'Query the MCP Server',
           description: 'Click "Send MCP JSON-RPC Request" to simulate a client query from Gemini Enterprise.',
-          actionType: 'click'
+          actionType: 'click',
+          cardPlacement: 'left'
         }
       ]
     }
@@ -584,7 +593,7 @@ export default function OnboardingTour({
       {/* 4. FLOATING TOUR CARD */}
       <AnimatePresence>
         {!isSelectorOpen && selectedWorkflow && currentStep && (
-          <div className="absolute bottom-6 right-6 pointer-events-auto w-80 sm:w-96 z-50">
+          <div className={`absolute bottom-6 ${currentStep.cardPlacement === 'left' ? 'left-6' : 'right-6'} pointer-events-auto w-80 sm:w-96 z-50`}>
             <motion.div
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -659,7 +668,9 @@ export default function OnboardingTour({
                       onClick={advanceStep}
                       className="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 font-bold text-[10px] px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                     >
-                      <span>Skip Step</span>
+                      <span>
+                        {currentStep.actionType === 'change' ? 'Proceed with Default' : 'Next Step'}
+                      </span>
                       <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
