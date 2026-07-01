@@ -146,6 +146,7 @@ export default function OnboardingTour({
           description: 'Click the "Auto-Remediate Gap" button on the first gap in the checklist. The AI will patch the text in memory and resolve the issue.',
           actionType: 'click',
           expectedSidePanel: 'auditor',
+          expectedSubTab: 'workspace',
           cardPlacement: 'left'
         }
       ]
@@ -345,6 +346,20 @@ export default function OnboardingTour({
       active = false;
     };
   }, [currentStep, isSelectorOpen, activePage, dossierTab]);
+
+  // Automatically scroll target element into view when the step changes
+  useEffect(() => {
+    if (!currentStep || isSelectorOpen) return;
+    
+    const timer = setTimeout(() => {
+      const element = getHighlightElement(currentStep.targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 400);
+    
+    return () => clearTimeout(timer);
+  }, [currentStep, isSelectorOpen]);
 
   // Automatically sync showLanding and activePage based on the current step's requirements
   useEffect(() => {

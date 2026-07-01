@@ -26,6 +26,15 @@ function setupScreenshotDirectory() {
   }
 }
 
+// Reset local database file to ensure tests start with clean, un-harmonized seed data
+function setupDatabase() {
+  const dbPath = path.join('/Users/nitinagga/Documents/DossierHarmonizer', 'dossier_workspace.db');
+  if (fs.existsSync(dbPath)) {
+    fs.unlinkSync(dbPath);
+    console.log('Successfully reset local SQLite test database.');
+  }
+}
+
 // Helper to sleep/delay
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -52,6 +61,7 @@ async function clickElementByText(page, text, elementType = 'button') {
 
 async function runTests() {
   setupScreenshotDirectory();
+  setupDatabase();
 
   let serverProcess;
   let browser;
@@ -168,6 +178,44 @@ async function runTests() {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03_dossier_aligner_workspace.png') });
     console.log('Captured: 03_dossier_aligner_workspace.png');
 
+    // Test the Onboarding Tour reactivation and tour card flow on a fresh, un-harmonized database state
+    console.log('Reopening Onboarding Tour...');
+    await clickElementByText(page, 'Start Guided Tour', 'button');
+    await sleep(1200);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '21_onboarding_reopened.png') });
+    console.log('Captured: 21_onboarding_reopened.png');
+
+    console.log('Selecting Dossier Audit & Gap Analysis workflow...');
+    await clickElementByText(page, 'Dossier Audit & Gap Analysis', 'button');
+    await sleep(2000); // Allow spotlight to calculate coords
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22_tour_spotlight_active.png') });
+    console.log('Captured: 22_tour_spotlight_active.png');
+
+    // Click "2. Gap Matrix Hub" to trigger transition to Step 2
+    console.log('Tour Step 1: Navigating to Gap Matrix Hub...');
+    await page.$eval('#sidebar-gap-matrix', el => el.click());
+    await sleep(2000);
+
+    // Click "1. Dossier Aligner & Tree" to trigger transition to Step 3
+    console.log('Tour Step 2: Navigating to Dossier Aligner & Tree...');
+    await page.$eval('#sidebar-dossier-aligner', el => el.click());
+    await sleep(2000);
+
+    // Capture the auto-scrolled remedy button target in Step 3
+    console.log('Tour Step 3: Verifying remedy button is exposed and highlighted...');
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22a_tour_step3_scrolled.png') });
+    console.log('Captured: 22a_tour_step3_scrolled.png');
+
+    console.log('Exiting active tour card...');
+    await page.$eval('#exit-tour-card-btn', el => el.click());
+    await sleep(1000);
+
+    console.log('Closing onboarding selector...');
+    await page.$eval('#close-onboarding-btn', el => el.click());
+    await sleep(1000);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '23_tour_exited.png') });
+    console.log('Captured: 23_tour_exited.png');
+
     // 7. Trigger the AI Harmonizer
     console.log('Triggering AI Harmonization...');
     await clickElementByText(page, 'Trigger Aligner Now', 'button');
@@ -245,29 +293,6 @@ async function runTests() {
       await page.screenshot({ path: path.join(SCREENSHOT_DIR, tab.file) });
       console.log(`Captured: ${tab.file}`);
     }
-
-    // 9. Test the Onboarding Tour reactivation and tour card flow
-    console.log('Reopening Onboarding Tour...');
-    await clickElementByText(page, 'Start Guided Tour', 'button');
-    await sleep(1200);
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '21_onboarding_reopened.png') });
-    console.log('Captured: 21_onboarding_reopened.png');
-
-    console.log('Selecting Dossier Audit & Gap Analysis workflow...');
-    await clickElementByText(page, 'Dossier Audit & Gap Analysis', 'button');
-    await sleep(1500); // Allow spotlight to calculate coords
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22_tour_spotlight_active.png') });
-    console.log('Captured: 22_tour_spotlight_active.png');
-
-    console.log('Exiting active tour card...');
-    await page.click('#exit-tour-card-btn');
-    await sleep(1000);
-
-    console.log('Closing onboarding selector...');
-    await page.click('#close-onboarding-btn');
-    await sleep(1000);
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '23_tour_exited.png') });
-    console.log('Captured: 23_tour_exited.png');
 
     console.log('E2E validation test completed successfully!');
 
