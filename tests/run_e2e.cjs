@@ -339,6 +339,97 @@ async function runTests() {
       console.log(`Captured: ${tab.file}`);
     }
 
+    // Test Workflow 3: Ingestion & OCR Processing onboarding tour flow
+    console.log('Reopening Onboarding Tour to test Ingestion & OCR Processing workflow...');
+    await clickElementByText(page, 'Start Guided Tour', 'button');
+    await sleep(1200);
+    
+    console.log('Selecting Ingestion & OCR Processing workflow...');
+    await clickElementByText(page, 'Ingestion & OCR Processing', 'button');
+    await sleep(1500);
+
+    console.log('Tour 3 Step 1: Navigating to Ingest & OCR Station...');
+    await page.$eval('#sidebar-ingest-ocr', el => el.click());
+    await sleep(1500);
+
+    console.log('Ingesting OCR text stream...');
+    await page.$eval('#ocr-scan-button', el => el.click());
+    await sleep(4000); // Wait for OCR parsing to complete and render the fields
+
+    console.log('Tour 3 Step 2: Typing custom section title...');
+    await page.type('#ocr-title-input', '3.2.S.1.3');
+    await sleep(1000);
+
+    console.log('Tour 3 Step 3: Triggering Create & Audit Section...');
+    await page.$eval('#ocr-submit-button', el => el.click());
+    await sleep(2000);
+
+    // Test Workflow 4: Pre-Flight & Publishing onboarding tour flow
+    console.log('Reopening Onboarding Tour to test Pre-Flight & Publishing workflow...');
+    await clickElementByText(page, 'Start Guided Tour', 'button');
+    await sleep(1200);
+    
+    console.log('Selecting Pre-Flight & Publishing workflow...');
+    await clickElementByText(page, 'Pre-Flight & Publishing', 'button');
+    await sleep(1500);
+
+    console.log('Tour 4 Step 1: Navigating to CFR Audit Trail...');
+    await page.$eval('#sidebar-audit-history', el => el.click());
+    await sleep(1500);
+
+    console.log('Tour 4 Step 2: Navigating back to Dossier Aligner...');
+    await page.$eval('#sidebar-dossier-aligner', el => el.click());
+    await sleep(1500);
+
+    console.log('Tour 4 Step 3: Switching to Compile & Export sub-tab...');
+    await page.$eval('#subtab-compiler', el => el.click());
+    await sleep(1500);
+
+    console.log('Tour 4 Step 4: Highlighting Export XML button...');
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22c_tour_workflow4_step4.png') });
+    console.log('Captured: 22c_tour_workflow4_step4.png');
+
+    console.log('Exiting active Tour 4 card...');
+    await page.$eval('#exit-tour-card-btn', el => el.click());
+    await sleep(1000);
+    
+    console.log('Closing onboarding selector...');
+    await page.$eval('#close-onboarding-btn', el => el.click());
+    await sleep(1000);
+
+    // Test Workflow 5: Developer Console & MCP onboarding tour flow
+    console.log('Reopening Onboarding Tour to test Developer Console & MCP workflow...');
+    await clickElementByText(page, 'Start Guided Tour', 'button');
+    await sleep(1200);
+    
+    console.log('Selecting Developer Console & MCP workflow...');
+    await clickElementByText(page, 'Developer Console & MCP', 'button');
+    await sleep(1500);
+
+    console.log('Tour 5 Step 1: Navigating to Agent Orchestrator...');
+    await page.$eval('#sidebar-agent-orchestrator', el => el.click());
+    await sleep(1500);
+
+    console.log('Tour 5 Step 2: Executing agent campaign...');
+    await page.$eval('#agent-execute-button', el => el.click());
+    await sleep(2500);
+
+    console.log('Tour 5 Step 3: Navigating to MCP tab...');
+    await page.$eval('#mcp-tab-button', el => el.click());
+    await sleep(1500);
+
+    console.log('Tour 5 Step 4: Highlighting Send MCP Request button...');
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '22d_tour_workflow5_step4.png') });
+    console.log('Captured: 22d_tour_workflow5_step4.png');
+
+    console.log('Exiting active Tour 5 card...');
+    await page.$eval('#exit-tour-card-btn', el => el.click());
+    await sleep(1000);
+    
+    console.log('Closing onboarding selector...');
+    await page.$eval('#close-onboarding-btn', el => el.click());
+    await sleep(1000);
+
     console.log('E2E validation test completed successfully!');
 
   } catch (error) {
