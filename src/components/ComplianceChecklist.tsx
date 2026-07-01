@@ -129,7 +129,7 @@ export default function ComplianceChecklist({
                       id={`remedy-gap-btn-${gap.id}`}
                       onClick={() => onResolveGap(gap.id)}
                       disabled={isHarmonizing}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-slate-900 hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-600/10 transition-all duration-150 disabled:opacity-50 cursor-pointer"
+                      className="remedy-gap-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-slate-900 hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-600/10 transition-all duration-150 disabled:opacity-50 cursor-pointer"
                     >
                       <Cpu className="w-3.5 h-3.5" />
                       Auto-Remediate Gap

@@ -135,7 +135,7 @@ export default function OnboardingTour({
           expectedPage: 'dossier_aligner'
         },
         {
-          targetId: 'remedy-gap-btn-gap-m1-1',
+          targetId: '.remedy-gap-btn',
           title: 'Remedy a Compliance Gap',
           description: 'Click the "Auto-Remediate Gap" button on the first gap in the checklist. The AI will patch the text in memory and resolve the issue.',
           actionType: 'click'
@@ -280,6 +280,14 @@ export default function OnboardingTour({
   const selectedWorkflow = workflows.find(w => w.id === workflowId) || null;
   const currentStep = selectedWorkflow?.steps[currentStepIdx];
 
+  const getHighlightElement = (selector: string): HTMLElement | null => {
+    if (!selector) return null;
+    if (selector.startsWith('.') || selector.startsWith('[') || selector.startsWith('#')) {
+      return document.querySelector(selector) as HTMLElement | null;
+    }
+    return document.getElementById(selector);
+  };
+
   // Effect to track the highlighted element's coordinates in real-time
   useEffect(() => {
     if (isSelectorOpen || !currentStep) {
@@ -290,7 +298,7 @@ export default function OnboardingTour({
     let active = true;
     const updatePosition = () => {
       if (!active) return;
-      const element = document.getElementById(currentStep.targetId);
+      const element = getHighlightElement(currentStep.targetId);
       if (element) {
         const rect = element.getBoundingClientRect();
         setHighlightCoords(prev => {
@@ -346,7 +354,7 @@ export default function OnboardingTour({
     if (isSelectorOpen || !currentStep) return;
 
     const handleUserAction = (e: Event) => {
-      const element = document.getElementById(currentStep.targetId);
+      const element = getHighlightElement(currentStep.targetId);
       if (!element) return;
 
       const isTarget = element === e.target || element.contains(e.target as Node);
