@@ -163,7 +163,7 @@ export default function OnboardingTour({
           actionType: 'change'
         },
         {
-          targetId: 'trigger-harmonize-button',
+          targetId: '.harmonize-trigger-btn',
           title: 'Run AI Harmonizer',
           description: 'Click "Run AI Harmonizer" or "Trigger Aligner Now" to translate the text. Watch the progress bar compile.',
           actionType: 'click'

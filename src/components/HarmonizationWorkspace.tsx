@@ -303,7 +303,7 @@ export default function HarmonizationWorkspace({
           <button
             onClick={onHarmonize}
             disabled={isHarmonizing}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/15 hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50"
+            className="harmonize-trigger-btn inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/15 hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50"
           >
             <Cpu className="w-4 h-4 animate-spin-slow" />
             {hasResult ? 'Re-harmonize Section' : 'Run AI Harmonizer'}
@@ -572,7 +572,7 @@ export default function HarmonizationWorkspace({
                         <div className="flex items-center gap-2 mt-5">
                           <button
                             onClick={onHarmonize}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all duration-150 shadow-md cursor-pointer"
+                            className="harmonize-trigger-btn inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all duration-150 shadow-md cursor-pointer"
                           >
                             <Play className="w-3.5 h-3.5" />
                             Trigger Aligner Now
