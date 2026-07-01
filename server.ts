@@ -8,6 +8,50 @@ import { createServer as createViteServer } from 'vite';
 dotenv.config();
 
 const app = express();
+
+// Custom Structured JSON Logger
+const logger = {
+  info: (message: string, meta: Record<string, any> = {}) => {
+    console.log(JSON.stringify({ timestamp: new Date().toISOString(), level: 'INFO', message, ...meta }));
+  },
+  warn: (message: string, meta: Record<string, any> = {}) => {
+    console.warn(JSON.stringify({ timestamp: new Date().toISOString(), level: 'WARN', message, ...meta }));
+  },
+  error: (message: string, error?: any, meta: Record<string, any> = {}) => {
+    console.error(JSON.stringify({ 
+      timestamp: new Date().toISOString(), 
+      level: 'ERROR', 
+      message, 
+      error: error?.message || String(error),
+      stack: error?.stack,
+      ...meta 
+    }));
+  }
+};
+
+// Security Headers Middleware (Manual Helmet Alternative)
+app.use((req, res, next) => {
+  // Prevent clickjacking by blocking frames
+  res.setHeader('X-Frame-Options', 'DENY');
+  
+  // Prevent MIME-type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // Force HTTPS (HSTS)
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  
+  // Controls referrer information
+  res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
+  
+  // Basic Content Security Policy (allows local assets, standard fonts, and Google APIs)
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' ws://localhost:* wss://localhost:* http://localhost:* https://*.googleapis.com"
+  );
+  
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
@@ -25,12 +69,12 @@ if (API_KEY) {
         },
       },
     });
-    console.log('Gemini API initialized successfully on the server.');
+    logger.info('Gemini API initialized successfully on the server.');
   } catch (error) {
-    console.error('Failed to initialize Gemini API:', error);
+    logger.error('Failed to initialize Gemini API:', error);
   }
 } else {
-  console.warn('GEMINI_API_KEY is missing. Server will operate with intelligent fallback data.');
+  logger.warn('GEMINI_API_KEY is missing. Server will operate with intelligent fallback data.');
 }
 
 // Global regulatory background rules used to feed Gemini's reasoning
@@ -150,12 +194,12 @@ Your response must be returned in JSON matching the defined schema structure. Le
       const parsed = JSON.parse(responseText.trim());
       return res.json(parsed);
     } catch (error: any) {
-      console.error('Error in analyze-gaps endpoint via Gemini:', error);
-      return res.status(500).json({ error: error.message || 'Error processing regulatory audit' });
+      logger.error('Error in analyze-gaps endpoint via Gemini', error, { sectionId, targetAuthority });
+      return res.status(500).json({ error: 'Internal Server Error', code: 'REG_ANALYSIS_FAILED' });
     }
   } else {
     // Elegant fallback mock audit generator based on targets
-    console.log('Using mock audit generator fallback');
+    logger.info('Using mock audit generator fallback', { sectionId, targetAuthority });
     const mockGaps = [];
     if (targetAuthority === 'FDA' && sourceAuthority === 'EMA') {
       mockGaps.push({
@@ -281,12 +325,12 @@ Your response must be structured in JSON matching the specified schema. Keep the
         ...parsed
       });
     } catch (error: any) {
-      console.error('Error in harmonize endpoint via Gemini:', error);
-      return res.status(500).json({ error: error.message || 'Error executing dossier harmonization' });
+      logger.error('Error in harmonize endpoint via Gemini', error, { sectionId, targetAuthority });
+      return res.status(500).json({ error: 'Internal Server Error', code: 'HARMONIZATION_FAILED' });
     }
   } else {
     // Robust Mock Harmonizer Fallback
-    console.log('Using mock harmonizer fallback');
+    logger.info('Using mock harmonizer fallback', { sectionId, targetAuthority });
     let harmonizedContent = content;
     const changeLog = [];
     const regulatoryReferences = [];
@@ -433,12 +477,12 @@ Keep your tone clinical, professional, helpful, and confident. Avoid promotional
         timestamp: new Date().toISOString()
       });
     } catch (error: any) {
-      console.error('Error in chat assistant:', error);
-      return res.status(500).json({ error: error.message || 'Error processing assistant query' });
+      logger.error('Error in chat assistant', error);
+      return res.status(500).json({ error: 'Internal Server Error', code: 'CHAT_FAILED' });
     }
   } else {
     // Intelligent Mock Chatbot responses
-    console.log('Using mock chat assistant');
+    logger.info('Using mock chat assistant', { userMessageLength: userMessage.length });
     let reply = "Hello! I am Harmonizer-AI, your regulatory compliance expert. Currently running in offline fallback mode.";
     
     const lower = userMessage.toLowerCase();
@@ -649,6 +693,16 @@ app.post('/api/mcp', (req, res) => {
 });
 
 
+// 4. Health Check Endpoint
+app.get('/healthz', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development',
+    apiKeyConfigured: !!process.env.GEMINI_API_KEY
+  });
+});
+
 // Serve Vite or static assets depending on environment
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
@@ -658,7 +712,7 @@ async function startServer() {
       appType: 'spa',
     });
     app.use(vite.middlewares);
-    console.log('Running in DEVELOPMENT mode with Vite dev middleware.');
+    logger.info('Running in DEVELOPMENT mode with Vite dev middleware.');
   } else {
     // In prod, serve bundled files
     const distPath = path.join(process.cwd(), 'dist');
@@ -666,11 +720,11 @@ async function startServer() {
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
-    console.log('Running in PRODUCTION mode serving static bundle.');
+    logger.info('Running in PRODUCTION mode serving static bundle.');
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server listening at http://localhost:${PORT}`);
+    logger.info(`Server listening at http://localhost:${PORT}`);
   });
 }
 

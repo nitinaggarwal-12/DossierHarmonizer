@@ -18,22 +18,22 @@ import HarmonizationWorkspace from './components/HarmonizationWorkspace';
 import ComplianceChecklist from './components/ComplianceChecklist';
 import RegulatoryAssistant from './components/RegulatoryAssistant';
 
-// Import New 10-Page Tab Components
-import GapMatrixHub from './components/GapMatrixHub';
-import FullChatAdvisor from './components/FullChatAdvisor';
-import IngestOcrStation from './components/IngestOcrStation';
-import VocabularyDictionary from './components/VocabularyDictionary';
-import StabilityPredictor from './components/StabilityPredictor';
-import EctdValidator from './components/EctdValidator';
-import SubstanceAnalyzer from './components/SubstanceAnalyzer';
-import GlobalIngressMap from './components/GlobalIngressMap';
-import AuditHistoryLogs from './components/AuditHistoryLogs';
-import RiskHeatmap from './components/RiskHeatmap';
-import LandingPage from './components/LandingPage';
-import ExecutiveHub from './components/ExecutiveHub';
-import FilingRegistry from './components/FilingRegistry';
-import AgentOrchestrator from './components/AgentOrchestrator';
-import OnboardingTour from './components/OnboardingTour';
+// Import New 10-Page Tab Components (Lazy Loaded for Performance & Bundle optimization)
+const GapMatrixHub = React.lazy(() => import('./components/GapMatrixHub'));
+const FullChatAdvisor = React.lazy(() => import('./components/FullChatAdvisor'));
+const IngestOcrStation = React.lazy(() => import('./components/IngestOcrStation'));
+const VocabularyDictionary = React.lazy(() => import('./components/VocabularyDictionary'));
+const StabilityPredictor = React.lazy(() => import('./components/StabilityPredictor'));
+const EctdValidator = React.lazy(() => import('./components/EctdValidator'));
+const SubstanceAnalyzer = React.lazy(() => import('./components/SubstanceAnalyzer'));
+const GlobalIngressMap = React.lazy(() => import('./components/GlobalIngressMap'));
+const AuditHistoryLogs = React.lazy(() => import('./components/AuditHistoryLogs'));
+const RiskHeatmap = React.lazy(() => import('./components/RiskHeatmap'));
+const LandingPage = React.lazy(() => import('./components/LandingPage'));
+const ExecutiveHub = React.lazy(() => import('./components/ExecutiveHub'));
+const FilingRegistry = React.lazy(() => import('./components/FilingRegistry'));
+const AgentOrchestrator = React.lazy(() => import('./components/AgentOrchestrator'));
+const OnboardingTour = React.lazy(() => import('./components/OnboardingTour'));
 
 import { 
   Dna, 
@@ -1521,6 +1521,12 @@ ${s.content}`;
           )}
 
           {/* PAGE SWITCH RENDERING DOCK */}
+          <React.Suspense fallback={
+            <div className="flex-grow flex flex-col items-center justify-center text-center p-8 select-none">
+              <div className="w-10 h-10 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin mb-4" />
+              <p className="text-[10px] font-bold text-slate-400 font-mono animate-pulse">Loading eCTD Workspace Module...</p>
+            </div>
+          }>
           {activePage === 'dashboard' && (
             <div className="flex-1 overflow-y-auto min-h-0 pr-1 h-full select-none" id="dashboard-viewport">
               <ExecutiveHub
@@ -2208,6 +2214,8 @@ ${s.content}`;
               />
             </div>
           )}
+
+          </React.Suspense>
 
           {/* Real-time re-validation / refresh overlay */}
           {isRefreshing && (
