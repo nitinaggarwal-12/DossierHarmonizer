@@ -258,6 +258,7 @@ export default function HarmonizationWorkspace({
           {hasResult && (
             <div className="flex rounded-xl border border-slate-900 bg-slate-950 p-1 text-xs">
               <button
+                id="tab-compare"
                 onClick={() => setActiveTab('compare')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
                   activeTab === 'compare' 
@@ -268,6 +269,7 @@ export default function HarmonizationWorkspace({
                 Comparative Workspace
               </button>
               <button
+                id="tab-diff"
                 onClick={() => setActiveTab('diff')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
                   activeTab === 'diff' 
@@ -278,6 +280,7 @@ export default function HarmonizationWorkspace({
                 View Diff
               </button>
               <button
+                id="tab-changelog"
                 onClick={() => setActiveTab('changelog')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
                   activeTab === 'changelog' 
@@ -288,6 +291,7 @@ export default function HarmonizationWorkspace({
                 AI Changelog ({harmonizationResult?.changeLog.length})
               </button>
               <button
+                id="tab-citations"
                 onClick={() => setActiveTab('references')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
                   activeTab === 'references' 

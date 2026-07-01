@@ -814,6 +814,8 @@ ${s.content}`;
             setCurrentStepIdx={setTourStepIdx}
             isSelectorOpen={tourIsSelectorOpen}
             setIsSelectorOpen={setTourIsSelectorOpen}
+            activeSidePanel={activeSidePanel}
+            setActiveSidePanel={setActiveSidePanel}
           />
         )}
       </>
@@ -2375,6 +2377,8 @@ ${s.content}`;
           setCurrentStepIdx={setTourStepIdx}
           isSelectorOpen={tourIsSelectorOpen}
           setIsSelectorOpen={setTourIsSelectorOpen}
+          activeSidePanel={activeSidePanel}
+          setActiveSidePanel={setActiveSidePanel}
         />
       )}
 

@@ -31,6 +31,7 @@ interface TourStep {
   actionType: 'click' | 'change' | 'input' | 'info';
   expectedPage?: string; // If the step expects a specific page/tab to be active
   expectedSubTab?: string;
+  expectedSidePanel?: 'auditor' | 'chat';
 }
 
 // Define a workflow
@@ -57,6 +58,8 @@ interface OnboardingTourProps {
   setCurrentStepIdx: React.Dispatch<React.SetStateAction<number>>;
   isSelectorOpen: boolean;
   setIsSelectorOpen: (open: boolean) => void;
+  activeSidePanel: 'auditor' | 'chat';
+  setActiveSidePanel: (panel: 'auditor' | 'chat') => void;
 }
 
 export default function OnboardingTour({ 
@@ -72,7 +75,9 @@ export default function OnboardingTour({
   currentStepIdx,
   setCurrentStepIdx,
   isSelectorOpen,
-  setIsSelectorOpen
+  setIsSelectorOpen,
+  activeSidePanel,
+  setActiveSidePanel
 }: OnboardingTourProps) {
   const [highlightCoords, setHighlightCoords] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const [completedWorkflow, setCompletedWorkflow] = useState<Workflow | null>(null);
@@ -138,7 +143,8 @@ export default function OnboardingTour({
           targetId: '.remedy-gap-btn',
           title: 'Remedy a Compliance Gap',
           description: 'Click the "Auto-Remediate Gap" button on the first gap in the checklist. The AI will patch the text in memory and resolve the issue.',
-          actionType: 'click'
+          actionType: 'click',
+          expectedSidePanel: 'auditor'
         }
       ]
     },
@@ -345,8 +351,11 @@ export default function OnboardingTour({
       if (currentStep.expectedSubTab && currentStep.expectedSubTab !== dossierTab) {
         setDossierTab(currentStep.expectedSubTab);
       }
+      if (currentStep.expectedSidePanel && currentStep.expectedSidePanel !== activeSidePanel) {
+        setActiveSidePanel(currentStep.expectedSidePanel);
+      }
     }
-  }, [currentStep, isSelectorOpen, activePage, dossierTab, setShowLanding, setActivePage, setDossierTab]);
+  }, [currentStep, isSelectorOpen, activePage, dossierTab, activeSidePanel, setShowLanding, setActivePage, setDossierTab, setActiveSidePanel]);
 
 
   // Global bubble listener to detect user actions on the highlighted element

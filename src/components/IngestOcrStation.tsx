@@ -315,6 +315,7 @@ During manufacture, in-process testing is performed to guarantee quality.
                   <div>
                     <label className="block text-[9px] uppercase font-bold text-slate-500 mb-1">eCTD Section Code</label>
                     <input
+                      id="ocr-section-code-input"
                       type="text"
                       value={sectionCodeInput}
                       onChange={(e) => setSectionCodeInput(e.target.value)}
@@ -324,6 +325,7 @@ During manufacture, in-process testing is performed to guarantee quality.
                   <div>
                     <label className="block text-[9px] uppercase font-bold text-slate-500 mb-1">Dossier Section Title</label>
                     <input
+                      id="ocr-title-input"
                       type="text"
                       value={titleInput}
                       onChange={(e) => setTitleInput(e.target.value)}
