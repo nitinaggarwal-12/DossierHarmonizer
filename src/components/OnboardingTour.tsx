@@ -652,63 +652,61 @@ export default function OnboardingTour({
           </div>
         )}
         {completedWorkflow && (
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="bg-slate-900/90 border border-slate-800 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6"
+          <div className="absolute bottom-6 right-6 pointer-events-auto w-80 sm:w-96 z-50">
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.95 }}
+              className="bg-slate-900/95 border border-slate-800 rounded-3xl p-5 shadow-2xl relative overflow-hidden backdrop-blur-md space-y-4"
             >
-              {/* Background Glow */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+              {/* Progress Bar (Full) */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
 
-              {/* Celebration Icon */}
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20">
-                <Check className="w-8 h-8 font-black" />
-              </div>
+              {/* Close Button ("X") */}
+              <button 
+                onClick={() => {
+                  setCompletedWorkflow(null);
+                  onClose();
+                }}
+                className="absolute top-3 right-3 p-1 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                title="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
 
-              {/* Title & Info */}
-              <div className="space-y-2">
-                <span className="text-[9px] font-mono font-bold tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full uppercase">
-                  Journey Completed Successfully
+              {/* Celebration Info */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[9px] font-mono font-black text-emerald-400 uppercase tracking-widest block flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                  Journey Completed!
                 </span>
-                <h3 className="text-xl font-black text-white uppercase tracking-tight pt-1">
+                <h3 className="text-sm font-black text-white leading-snug">
                   {completedWorkflow.name}
                 </h3>
-                <p className="text-xs text-slate-400 leading-relaxed font-sans font-normal px-2">
-                  You've successfully walked through this guided journey and experienced how Pharma Dossier Harmonizer accelerates global drug filings.
+                <p className="text-[11px] text-slate-300 leading-relaxed font-sans font-normal">
+                  You've successfully finished this guided tour. To experience other platform features, we recommend selecting another workflow.
                 </p>
               </div>
 
-              {/* Advise Message Box */}
-              <div className="p-4 bg-slate-950 border border-slate-850 rounded-2xl text-[11px] text-slate-300 leading-relaxed text-left flex gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5 animate-pulse" />
-                <div>
-                  <span className="font-bold text-slate-200 block mb-0.5">Explore More Workflows</span>
-                  To gain a complete understanding of all platform modalities (such as OCR document ingestion, climate stability mapping, or GxP CFR audit databases), we highly recommend selecting and exploring another guided workflow.
-                </div>
-              </div>
-
               {/* Action Buttons */}
-              <div className="w-full flex flex-col gap-2.5 pt-2">
+              <div className="flex gap-2 pt-1 border-t border-slate-900">
                 <button
                   onClick={() => {
                     setCompletedWorkflow(null);
                     setIsSelectorOpen(true);
                   }}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-emerald-600/15 uppercase tracking-wider active:scale-[0.98]"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[10px] py-2 rounded-xl transition-all cursor-pointer uppercase tracking-wider text-center"
                 >
-                  Select Another Workflow
+                  Select Tour
                 </button>
                 <button
                   onClick={() => {
                     setCompletedWorkflow(null);
                     onClose();
                   }}
-                  className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:text-slate-200 font-bold text-xs py-3 rounded-xl transition-all cursor-pointer uppercase tracking-wider active:scale-[0.98]"
+                  className="flex-1 bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:text-slate-200 font-bold text-[10px] py-2 rounded-xl transition-all cursor-pointer uppercase tracking-wider text-center"
                 >
-                  Close & Explore Freely
+                  Explore Freely
                 </button>
               </div>
             </motion.div>
